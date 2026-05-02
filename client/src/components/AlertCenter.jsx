@@ -1,0 +1,1 @@
+export default function AlertCenter() { return <div>AlertCenter</div>; }

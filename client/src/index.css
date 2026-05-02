@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+/* Custom theme extensions for Tailwind v4 */
+@theme {
+  --font-inter: 'Inter', sans-serif;
+  --font-poppins: 'Poppins', sans-serif;
+}
+
+/* Base styles */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Blob animation */
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+.animate-blob {
+  animation: blob 8s ease-in-out infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}

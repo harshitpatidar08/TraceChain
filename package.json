@@ -1,0 +1,11 @@
+{
+  "name": "tracechain",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"cd client && npm run dev\" \"cd server && node index.js\""
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
