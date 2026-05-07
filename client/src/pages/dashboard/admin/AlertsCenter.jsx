@@ -79,27 +79,27 @@ const AlertsCenter = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-poppins">
           <AlertTriangle className="text-orange-500 w-6 h-6" /> Alerts Center
         </h2>
-        <p className="text-slate-400 text-sm mt-1">Manage network anomalies, AI insights, and supply chain integrity issues.</p>
+        <p className="text-gray-500 text-sm mt-1 font-medium">Manage network anomalies, AI insights, and supply chain integrity issues.</p>
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-700 pb-px">
+      <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-px">
         {filters.map(f => (
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
-            className={`px-6 py-3 font-bold text-sm transition-all relative ${
+            className={`px-6 py-3 font-black text-xs uppercase tracking-widest transition-all relative ${
               activeFilter === f 
-                ? 'text-orange-400' 
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-t-lg'
+                ? 'text-orange-600' 
+                : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-t-xl'
             }`}
           >
             {f}
             {activeFilter === f && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 shadow-[0_-2px_10px_rgba(249,115,22,0.5)]"></div>
+              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 shadow-lg shadow-orange-500/20"></div>
             )}
           </button>
         ))}
@@ -109,15 +109,15 @@ const AlertsCenter = () => {
       <div className="space-y-4">
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent shadow-lg shadow-orange-500/20"></div>
           </div>
         ) : filteredAlerts.length === 0 ? (
-          <div className="bg-slate-800 p-16 rounded-xl border border-slate-700 text-center shadow-sm">
-            <div className="w-24 h-24 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <div className="bg-white p-16 rounded-3xl border border-slate-200 text-center shadow-xl">
+            <div className="w-24 h-24 bg-green-50 border border-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-12 h-12 text-green-500" />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-2">All clear!</h3>
-            <p className="text-slate-400 max-w-sm mx-auto">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2 font-poppins">All clear!</h3>
+            <p className="text-gray-500 max-w-sm mx-auto font-medium">
               {activeFilter === 'Resolved' 
                 ? 'No resolved alerts found.' 
                 : `There are no ${activeFilter !== 'All' ? activeFilter.toLowerCase() + ' severity' : 'active'} alerts at this time.`}
@@ -127,62 +127,62 @@ const AlertsCenter = () => {
           filteredAlerts.map(alert => {
             const isResolved = alert.resolved;
             let borderColor = 'border-blue-500';
-            let iconColor = 'text-blue-500';
-            let bgLight = 'bg-blue-500/10';
+            let iconColor = 'text-blue-600';
+            let bgLight = 'bg-blue-50';
             
             if (alert.severity === 'high') {
               borderColor = 'border-red-500';
-              iconColor = 'text-red-500';
-              bgLight = 'bg-red-500/10';
+              iconColor = 'text-red-600';
+              bgLight = 'bg-red-50';
             } else if (alert.severity === 'medium') {
               borderColor = 'border-orange-500';
-              iconColor = 'text-orange-500';
-              bgLight = 'bg-orange-500/10';
+              iconColor = 'text-orange-600';
+              bgLight = 'bg-orange-50';
             }
 
             if (isResolved) {
-              borderColor = 'border-slate-600';
-              iconColor = 'text-slate-500';
-              bgLight = 'bg-slate-700/30';
+              borderColor = 'border-slate-200';
+              iconColor = 'text-gray-400';
+              bgLight = 'bg-gray-50';
             }
 
             return (
               <div 
                 key={alert.id} 
-                className={`bg-slate-800 rounded-xl border border-slate-700 shadow-sm overflow-hidden flex flex-col sm:flex-row transition-all
-                  ${isResolved ? 'opacity-60 grayscale-[0.5]' : ''} 
-                  hover:shadow-md border-l-4 ${borderColor}`}
+                className={`bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col sm:flex-row transition-all
+                  ${isResolved ? 'opacity-60 grayscale-[0.2]' : ''} 
+                  hover:shadow-lg border-l-4 ${borderColor}`}
               >
                 {/* Alert Info Section */}
                 <div className="flex-1 p-5 md:p-6 flex items-start gap-4">
-                  <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${bgLight} ${iconColor}`}>
+                  <div className={`shrink-0 w-12 h-12 rounded-2xl border flex items-center justify-center ${bgLight} ${iconColor} ${isResolved ? 'border-slate-100' : 'border-' + alert.severity + '-100'}`}>
                     {getAlertIcon(alert.alert_type)}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded
-                        ${isResolved ? 'bg-slate-700 text-slate-400' : bgLight + ' ' + iconColor}`}>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className={`text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-full border
+                        ${isResolved ? 'bg-gray-100 text-gray-400 border-slate-200' : bgLight + ' ' + iconColor + ' border-' + alert.severity + '-100'}`}>
                         {alert.alert_type.replace('_', ' ')}
                       </span>
-                      {isResolved && <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-slate-700 text-slate-300">Resolved</span>}
+                      {isResolved && <span className="text-[9px] uppercase font-black tracking-widest px-2.5 py-1 rounded-full bg-slate-50 text-slate-400 border border-slate-100">Resolved</span>}
                       
-                      <span className="flex items-center gap-1 text-xs text-slate-500 ml-auto sm:ml-0 font-medium">
+                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 ml-auto sm:ml-0 uppercase tracking-widest">
                         <Clock className="w-3.5 h-3.5" /> {timeAgo(alert.created_at)}
                       </span>
                     </div>
                     
-                    <h4 className="text-lg font-bold text-white mb-1 pr-4">
+                    <h4 className="text-lg font-black text-gray-900 mb-1 pr-4 font-poppins">
                       {alert.product ? (
-                        <Link to={`/dashboard/product/${alert.product_id}`} className="hover:text-orange-400 transition-colors">
+                        <Link to={`/dashboard/product/${alert.product_id}`} className="hover:text-orange-500 transition-colors">
                           {alert.product.name}
                         </Link>
                       ) : (
-                        <span className="font-mono text-sm">{alert.product_id}</span>
+                        <span className="font-mono text-sm font-bold text-orange-600">ID: {alert.product_id}</span>
                       )}
                     </h4>
                     
-                    <p className="text-slate-300 text-sm leading-relaxed max-w-3xl">
+                    <p className="text-gray-500 text-sm leading-relaxed max-w-3xl font-medium">
                       {alert.message}
                     </p>
                   </div>
@@ -190,12 +190,12 @@ const AlertsCenter = () => {
 
                 {/* Actions Section */}
                 {!isResolved && (
-                  <div className="p-5 md:p-6 bg-slate-900/30 border-t sm:border-t-0 sm:border-l border-slate-700 flex items-center justify-end sm:justify-center sm:min-w-[160px]">
+                  <div className="p-5 md:p-6 bg-gray-50/50 border-t sm:border-t-0 sm:border-l border-slate-100 flex items-center justify-end sm:justify-center sm:min-w-[180px]">
                     <button 
                       onClick={() => handleResolve(alert.id)}
-                      className="bg-slate-700 hover:bg-slate-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold transition-colors flex items-center gap-2 w-full sm:w-auto justify-center"
+                      className="bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 w-full sm:w-auto justify-center shadow-sm active:scale-95"
                     >
-                      <CheckCircle className="w-4 h-4 text-green-400" /> Resolve
+                      <CheckCircle className="w-4 h-4 text-green-500" /> Resolve
                     </button>
                   </div>
                 )}

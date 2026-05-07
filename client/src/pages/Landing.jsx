@@ -10,6 +10,8 @@ import {
 
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import ChatbotWidget from '../components/ChatbotWidget';
+import { useAuth } from '../context/AuthContext';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -27,6 +29,7 @@ const staggerContainer = {
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <div className="bg-white text-gray-900 min-h-screen font-inter w-full overflow-x-hidden selection:bg-orange-200">
       <Navbar />
@@ -76,12 +79,21 @@ export default function Landing() {
                 <span>Track a Product</span>
                 <ArrowRight size={20} />
               </Link>
-              <Link 
-                to="/auth"
-                className="px-8 py-4 rounded-full border-2 border-orange-200 text-orange-600 font-bold text-lg hover:border-orange-500 hover:bg-orange-50 transition-all flex items-center justify-center"
-              >
-                Join as Stakeholder
-              </Link>
+              {user ? (
+                <Link 
+                  to="/dashboard"
+                  className="px-8 py-4 rounded-full border-2 border-orange-200 text-orange-600 font-bold text-lg hover:border-orange-500 hover:bg-orange-50 transition-all flex items-center justify-center"
+                >
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <Link 
+                  to="/auth"
+                  className="px-8 py-4 rounded-full border-2 border-orange-200 text-orange-600 font-bold text-lg hover:border-orange-500 hover:bg-orange-50 transition-all flex items-center justify-center"
+                >
+                  Join as Stakeholder
+                </Link>
+              )}
             </div>
             
             <div className="pt-6 border-t border-gray-100 flex items-center gap-6 flex-wrap">
@@ -236,6 +248,7 @@ export default function Landing() {
       </section>
 
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }

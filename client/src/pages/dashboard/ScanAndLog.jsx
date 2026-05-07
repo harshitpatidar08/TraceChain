@@ -147,19 +147,19 @@ const ScanAndLog = () => {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto">
       {/* LEFT COLUMN - Scanner */}
       <div className="lg:col-span-5 space-y-6">
-        <div className="bg-slate-800 p-6 rounded-xl border-2 border-orange-500/50 shadow-lg shadow-orange-500/10">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-4">
+        <div className="bg-white p-6 rounded-2xl border-2 border-orange-500 shadow-xl shadow-orange-500/5">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2 mb-4">
             <ScanLine className="text-orange-500" /> Scan Product QR
           </h2>
           
-          <div className="rounded-lg overflow-hidden border border-slate-700 bg-slate-900 mb-6 relative min-h-[300px]">
+          <div className="rounded-xl overflow-hidden border border-slate-100 bg-gray-50 mb-6 relative min-h-[300px]">
             <QRScanner onScanSuccess={handleScan} />
           </div>
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-slate-700"></div>
-            <span className="text-slate-500 text-sm font-medium uppercase tracking-wider">or enter manually</span>
-            <div className="flex-1 h-px bg-slate-700"></div>
+            <div className="flex-1 h-px bg-slate-100"></div>
+            <span className="text-gray-400 text-[10px] font-bold uppercase tracking-widest">or enter manually</span>
+            <div className="flex-1 h-px bg-slate-100"></div>
           </div>
 
           <form onSubmit={handleSearchSubmit} className="flex gap-2">
@@ -168,9 +168,9 @@ const ScanAndLog = () => {
               placeholder="Enter Trace ID" 
               value={traceId}
               onChange={e => setTraceId(e.target.value)}
-              className="flex-1 bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-lg px-4 py-3 outline-none text-white font-mono placeholder-slate-500 transition-colors"
+              className="flex-1 bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 rounded-xl px-4 py-3 outline-none text-gray-900 font-mono placeholder-gray-400 transition-all"
             />
-            <button type="submit" disabled={searchLoading || !traceId} className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-4 rounded-lg font-medium transition-colors flex items-center justify-center">
+            <button type="submit" disabled={searchLoading || !traceId} className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white px-5 rounded-xl font-bold transition-all flex items-center justify-center shadow-md active:scale-95">
               {searchLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
             </button>
           </form>
@@ -180,54 +180,54 @@ const ScanAndLog = () => {
       {/* RIGHT COLUMN - Product & Form */}
       <div className="lg:col-span-7">
         {!product ? (
-          <div className="bg-slate-800/50 border border-slate-700/50 border-dashed rounded-xl h-full min-h-[400px] flex flex-col items-center justify-center p-12 text-center">
-            <div className="w-20 h-20 bg-slate-800 rounded-full flex items-center justify-center mb-4">
-              <ScanLine className="w-10 h-10 text-slate-500" />
+          <div className="bg-white border border-slate-200 border-dashed rounded-2xl h-full min-h-[400px] flex flex-col items-center justify-center p-12 text-center shadow-sm">
+            <div className="w-20 h-20 bg-gray-50 border border-slate-100 rounded-full flex items-center justify-center mb-4">
+              <ScanLine className="w-10 h-10 text-gray-300" />
             </div>
-            <h3 className="text-xl font-bold text-slate-300 mb-2">Scan or enter a Trace ID to begin</h3>
-            <p className="text-slate-500">Scan a product's QR code to view its details and append a new event to its blockchain record.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2 font-poppins">Scan or enter a Trace ID to begin</h3>
+            <p className="text-gray-500">Scan a product's QR code to view its details and append a new event to its blockchain record.</p>
           </div>
         ) : (
           <div className="space-y-6">
             {/* Product Info Card */}
-            <div className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm flex flex-col sm:flex-row gap-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold text-white">{product.name}</h3>
-                  {product.brand && <span className="text-sm text-slate-400 bg-slate-700/50 px-2 py-0.5 rounded">by {product.brand}</span>}
+                  <h3 className="text-xl font-bold text-gray-900">{product.name}</h3>
+                  {product.brand && <span className="text-[10px] font-bold uppercase tracking-wider text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-100">by {product.brand}</span>}
                 </div>
-                <p className="font-mono text-sm text-orange-400 mb-4">{product.id}</p>
+                <p className="font-mono text-sm text-orange-600 font-bold mb-4">{product.id}</p>
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-slate-500 block mb-1">Current Stage</span>
-                    <span className="capitalize font-medium text-white bg-slate-700 px-2 py-1 rounded inline-block">{product.current_stage}</span>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Current Stage</span>
+                    <span className="capitalize font-bold text-gray-900 bg-gray-50 border border-slate-100 px-2 py-1 rounded inline-block">{product.current_stage}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 block mb-1">Expiry Status</span>
-                    <span className={`font-medium text-${getExpiryInfo(product.exp_date).color}-400`}>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Expiry Status</span>
+                    <span className={`font-bold text-${getExpiryInfo(product.exp_date).color}-600`}>
                       {product.exp_date ? new Date(product.exp_date).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
                 </div>
               </div>
               
-              <div className="flex flex-col items-center justify-center sm:border-l sm:border-slate-700 sm:pl-6">
-                <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center mb-2
-                  ${product.trust_score > 80 ? 'border-green-500 text-green-500' : product.trust_score > 50 ? 'border-yellow-500 text-yellow-500' : 'border-red-500 text-red-500'}`}>
-                  <span className="text-2xl font-bold">{product.trust_score}</span>
+              <div className="flex flex-col items-center justify-center sm:border-l sm:border-slate-100 sm:pl-6">
+                <div className={`w-16 h-16 rounded-full border-[3px] flex items-center justify-center mb-2
+                  ${product.trust_score > 80 ? 'border-green-500 text-green-600 bg-green-50' : product.trust_score > 50 ? 'border-orange-500 text-orange-600 bg-orange-50' : 'border-red-500 text-red-600 bg-red-50'}`}>
+                  <span className="text-xl font-black">{product.trust_score}</span>
                 </div>
-                <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Trust Score</span>
+                <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Trust Score</span>
               </div>
             </div>
 
             {alerts.length > 0 && (
-              <div className="bg-red-500/10 border border-red-500/50 p-4 rounded-xl">
-                <h4 className="flex items-center gap-2 font-bold text-red-400 mb-2"><Info className="w-5 h-5" /> Active Alerts</h4>
+              <div className="bg-red-50 border border-red-100 p-4 rounded-2xl">
+                <h4 className="flex items-center gap-2 font-bold text-red-700 mb-2 uppercase tracking-wider text-xs"><Info className="w-4 h-4" /> Active Alerts</h4>
                 <ul className="space-y-1">
                   {alerts.map(a => (
-                    <li key={a.id} className="text-sm text-red-300 flex items-start gap-2">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
+                    <li key={a.id} className="text-sm text-red-600 flex items-start gap-2 font-medium">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0"></span>
                       {a.message}
                     </li>
                   ))}
@@ -237,70 +237,70 @@ const ScanAndLog = () => {
 
             {/* Form or Success */}
             {successHash ? (
-              <div className="bg-slate-800 p-10 rounded-xl border border-green-500/50 text-center shadow-lg relative overflow-hidden">
+              <div className="bg-white p-10 rounded-2xl border border-green-200 text-center shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-1 bg-green-500"></div>
-                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100">
                   <CheckCircle className="w-8 h-8 text-green-500" />
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Event Logged Successfully</h3>
-                <p className="text-slate-400 mb-6">Cryptographic proof appended to the network.</p>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Event Logged Successfully</h3>
+                <p className="text-gray-500 mb-6">Cryptographic proof appended to the network.</p>
                 
-                <div className="bg-slate-900 p-4 rounded-lg mb-8 border border-slate-700">
-                  <span className="text-xs text-slate-500 uppercase block mb-1">Transaction Hash</span>
-                  <p className="font-mono text-orange-400 text-sm break-all">{successHash}</p>
+                <div className="bg-gray-50 p-4 rounded-xl mb-8 border border-slate-100">
+                  <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest block mb-1">Transaction Hash</span>
+                  <p className="font-mono text-orange-600 text-xs break-all font-bold tracking-wider">{successHash}</p>
                 </div>
                 
-                <button onClick={resetForm} className="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-lg font-medium transition-colors w-full sm:w-auto">
+                <button onClick={resetForm} className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-bold transition-all w-full sm:w-auto shadow-md active:scale-95">
                   Log Another Event
                 </button>
               </div>
             ) : (
-              <div className="bg-slate-800 p-6 sm:p-8 rounded-xl border border-slate-700 shadow-sm relative">
-                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-                  <Package className="w-32 h-32 text-orange-500" />
+              <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 p-6 opacity-5 pointer-events-none rotate-12">
+                  <Package className="w-48 h-48 text-orange-500" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-6">Log Your Event</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-6 relative z-10">Log Your Event</h3>
                 
                 <form onSubmit={handleLogEvent} className="space-y-5 relative z-10">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Actor Name</label>
-                      <input disabled value={user?.user_metadata?.display_name || user?.email} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-slate-400 cursor-not-allowed" />
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actor Name</label>
+                      <input disabled value={user?.user_metadata?.display_name || user?.email} className="w-full bg-gray-50 border border-slate-100 rounded-xl px-4 py-2.5 text-gray-500 cursor-not-allowed font-medium" />
                     </div>
                     
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Stage</label>
-                      <input disabled value={myStage.toUpperCase()} className="w-full bg-slate-900/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-orange-400/80 font-medium cursor-not-allowed" />
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Stage</label>
+                      <input disabled value={myStage.toUpperCase()} className="w-full bg-orange-50 border border-orange-100 rounded-xl px-4 py-2.5 text-orange-600 font-bold cursor-not-allowed tracking-wider" />
                     </div>
 
                     <div className="col-span-1 sm:col-span-2 space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Location *</label>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Location *</label>
                       <div className="flex">
-                        <input required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} className="w-full bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-l-lg px-4 py-2.5 outline-none text-white transition-colors" placeholder="City, Facility Name" />
-                        <button type="button" onClick={getLocation} disabled={locationLoading} className="bg-slate-700 hover:bg-slate-600 px-4 rounded-r-lg border border-l-0 border-slate-700 transition-colors flex items-center justify-center">
-                          {locationLoading ? <Loader2 className="w-4 h-4 animate-spin text-slate-300" /> : <MapPin className="w-4 h-4 text-slate-300" />}
+                        <input required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 rounded-l-xl px-4 py-2.5 outline-none text-gray-900 transition-all font-medium" placeholder="City, Facility Name" />
+                        <button type="button" onClick={getLocation} disabled={locationLoading} className="bg-gray-50 hover:bg-gray-100 px-4 rounded-r-xl border border-l-0 border-slate-200 transition-colors flex items-center justify-center">
+                          {locationLoading ? <Loader2 className="w-4 h-4 animate-spin text-gray-400" /> : <MapPin className="w-4 h-4 text-gray-400" />}
                         </button>
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Temperature (°C)</label>
-                      <input type="number" step="0.1" value={eventData.temperature} onChange={e => setEventData({...eventData, temperature: e.target.value})} className="w-full bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-lg px-4 py-2.5 outline-none text-white transition-colors placeholder-slate-600" placeholder="Optional" />
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Temperature (°C)</label>
+                      <input type="number" step="0.1" value={eventData.temperature} onChange={e => setEventData({...eventData, temperature: e.target.value})} className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 rounded-xl px-4 py-2.5 outline-none text-gray-900 transition-all font-medium placeholder-gray-300" placeholder="Optional" />
                     </div>
                     
                     <div className="space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Humidity (%)</label>
-                      <input type="number" step="0.1" value={eventData.humidity} onChange={e => setEventData({...eventData, humidity: e.target.value})} className="w-full bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-lg px-4 py-2.5 outline-none text-white transition-colors placeholder-slate-600" placeholder="Optional" />
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Humidity (%)</label>
+                      <input type="number" step="0.1" value={eventData.humidity} onChange={e => setEventData({...eventData, humidity: e.target.value})} className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 rounded-xl px-4 py-2.5 outline-none text-gray-900 transition-all font-medium placeholder-gray-300" placeholder="Optional" />
                     </div>
 
                     <div className="col-span-1 sm:col-span-2 space-y-1">
-                      <label className="text-sm font-medium text-slate-300">Notes</label>
-                      <textarea rows="3" value={eventData.notes} onChange={e => setEventData({...eventData, notes: e.target.value})} className="w-full bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-lg px-4 py-2.5 outline-none text-white transition-colors placeholder-slate-600" placeholder="Observations, condition checks..."></textarea>
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Notes</label>
+                      <textarea rows="3" value={eventData.notes} onChange={e => setEventData({...eventData, notes: e.target.value})} className="w-full bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/10 rounded-xl px-4 py-2.5 outline-none text-gray-900 transition-all font-medium placeholder-gray-300" placeholder="Observations, condition checks..."></textarea>
                     </div>
                   </div>
 
-                  <button type="submit" disabled={logLoading} className="w-full bg-orange-500 hover:bg-orange-600 px-4 py-3 rounded-lg font-bold text-white transition-colors flex items-center justify-center shadow-lg shadow-orange-500/20 mt-4">
+                  <button type="submit" disabled={logLoading} className="w-full bg-orange-500 hover:bg-orange-600 px-4 py-3 rounded-xl font-bold text-white transition-all flex items-center justify-center shadow-lg shadow-orange-500/10 mt-4 active:scale-95">
                     {logLoading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Submit Event to Blockchain'}
                   </button>
                 </form>

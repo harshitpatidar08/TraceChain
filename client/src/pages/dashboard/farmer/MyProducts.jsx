@@ -37,8 +37,8 @@ const MyProducts = () => {
   }, []);
 
   const getStatusBadge = (status) => {
-    const map = { active: 'bg-green-500/20 text-green-400', recalled: 'bg-red-500/20 text-red-400', expired: 'bg-yellow-500/20 text-yellow-400' };
-    return <span className={`px-2 py-1 rounded border border-slate-700/50 text-xs font-bold uppercase ${map[status] || map.active}`}>{status}</span>;
+    const map = { active: 'bg-green-100 text-green-700', recalled: 'bg-red-100 text-red-700', expired: 'bg-amber-100 text-amber-700' };
+    return <span className={`px-2 py-1 rounded border border-slate-100 text-[10px] font-bold uppercase ${map[status] || map.active}`}>{status}</span>;
   };
 
   const getExpiryInfo = (expDate) => {
@@ -69,12 +69,12 @@ const MyProducts = () => {
   return (
     <div className="space-y-6">
       {/* Header Row */}
-      <div className="flex justify-between items-center bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div>
-          <h2 className="text-2xl font-bold text-white">My Products</h2>
-          <p className="text-slate-400 text-sm mt-1">Manage and track your registered batches.</p>
+          <h2 className="text-2xl font-bold text-gray-900 font-poppins">My Products</h2>
+          <p className="text-gray-500 text-sm mt-1">Manage and track your registered batches.</p>
         </div>
-        <Link to="/dashboard/farmer/register" className="bg-orange-500 hover:bg-orange-600 transition-colors px-5 py-2.5 rounded-lg font-medium text-white flex items-center gap-2 shadow-lg shadow-orange-500/20">
+        <Link to="/dashboard/farmer/register" className="bg-orange-500 hover:bg-orange-600 transition-all px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 shadow-lg shadow-orange-500/10 active:scale-95">
           <Plus className="w-5 h-5" /> Register New
         </Link>
       </div>
@@ -84,13 +84,13 @@ const MyProducts = () => {
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
         </div>
       ) : products.length === 0 ? (
-        <div className="bg-slate-800 p-12 rounded-xl border border-slate-700 text-center shadow-sm">
-          <div className="w-20 h-20 bg-slate-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Package className="w-10 h-10 text-slate-400" />
+        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center shadow-sm">
+          <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-slate-100">
+            <Package className="w-10 h-10 text-gray-300" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">No products registered yet</h3>
-          <p className="text-slate-400 mb-6 max-w-md mx-auto">Start tracing your products by registering your first batch onto the blockchain.</p>
-          <Link to="/dashboard/farmer/register" className="inline-flex bg-orange-500 hover:bg-orange-600 transition-colors px-6 py-3 rounded-lg font-medium text-white items-center gap-2">
+          <h3 className="text-xl font-bold text-gray-900 mb-2">No products registered yet</h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">Start tracing your products by registering your first batch onto the blockchain.</p>
+          <Link to="/dashboard/farmer/register" className="inline-flex bg-orange-500 hover:bg-orange-600 transition-all px-6 py-3 rounded-xl font-bold text-white items-center gap-2 shadow-md">
             <Plus className="w-5 h-5" /> Register First Product
           </Link>
         </div>
@@ -99,28 +99,28 @@ const MyProducts = () => {
           {products.map(product => {
             const expInfo = getExpiryInfo(product.exp_date);
             return (
-              <div key={product.id} className="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-sm hover:shadow-md transition-shadow">
+              <div key={product.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 {/* Top: Name & Status */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="text-lg font-bold text-white">{product.name}</h3>
-                    <p className="text-sm font-mono text-orange-400 mt-1">{product.id}</p>
+                    <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
+                    <p className="text-xs font-mono text-orange-500 mt-1 font-bold">{product.id}</p>
                   </div>
                   {getStatusBadge(product.status)}
                 </div>
 
                 {/* Middle: Category & Trust Score */}
-                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-700/50">
-                  <span className="px-3 py-1 bg-slate-700 text-slate-300 rounded-full text-xs font-medium capitalize flex items-center gap-1.5">
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-50">
+                  <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-orange-100">
                     <Package className="w-3.5 h-3.5" /> {product.category}
                   </span>
                   
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Trust Score</span>
-                    <span className={`px-2 py-0.5 rounded font-mono font-bold text-sm
-                      ${product.trust_score > 80 ? 'bg-green-500/20 text-green-400' : 
-                        product.trust_score > 50 ? 'bg-yellow-500/20 text-yellow-400' : 
-                        'bg-red-500/20 text-red-400'}`}>
+                    <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Trust Score</span>
+                    <span className={`px-2 py-0.5 rounded font-mono font-bold text-sm border
+                      ${product.trust_score > 80 ? 'bg-green-50 text-green-700 border-green-100' : 
+                        product.trust_score > 50 ? 'bg-orange-50 text-orange-700 border-orange-100' : 
+                        'bg-red-50 text-red-700 border-red-100'}`}>
                       {product.trust_score}
                     </span>
                   </div>
@@ -129,16 +129,16 @@ const MyProducts = () => {
                 {/* Info Row: Origin & Expiry */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-slate-500 uppercase font-semibold flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
                       <MapPin className="w-3.5 h-3.5" /> Origin
                     </span>
-                    <span className="text-sm text-slate-300 truncate" title={product.origin}>{product.origin}</span>
+                    <span className="text-sm text-gray-700 font-medium truncate" title={product.origin}>{product.origin}</span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <span className="text-xs text-slate-500 uppercase font-semibold flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" /> Expiry
                     </span>
-                    <span className={`text-sm font-medium text-${expInfo.color}-400`}>
+                    <span className={`text-sm font-bold text-${expInfo.color === 'orange' ? 'orange' : expInfo.color === 'green' ? 'green' : 'red'}-600`}>
                       {product.exp_date ? new Date(product.exp_date).toLocaleDateString() : 'N/A'}
                     </span>
                   </div>
@@ -151,10 +151,10 @@ const MyProducts = () => {
 
                 {/* Bottom Row: Actions */}
                 <div className="flex gap-3 mt-auto">
-                  <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-slate-700 hover:bg-slate-600 transition-colors text-white py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2">
+                  <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-orange-500 hover:bg-orange-600 transition-all text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95">
                     <Activity className="w-4 h-4" /> View Journey
                   </button>
-                  <button onClick={() => downloadQR(product.id)} className="bg-slate-700 hover:bg-slate-600 transition-colors text-slate-300 px-4 py-2 rounded-lg flex items-center justify-center">
+                  <button onClick={() => downloadQR(product.id)} className="bg-white border border-slate-200 hover:bg-gray-50 transition-colors text-gray-600 px-4 py-2.5 rounded-xl flex items-center justify-center shadow-sm">
                     <Download className="w-4 h-4" />
                   </button>
                 </div>

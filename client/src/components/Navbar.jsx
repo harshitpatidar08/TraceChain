@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -65,18 +67,37 @@ export default function Navbar() {
 
             {/* Right: CTA Buttons */}
             <div className="hidden md:flex items-center space-x-4">
-              <Link 
-                to="/auth"
-                className="px-5 py-2.5 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
-              >
-                Login
-              </Link>
-              <Link 
-                to="/auth"
-                className="px-5 py-2.5 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors hover:-translate-y-0.5 transform"
-              >
-                Get Started
-              </Link>
+              {user ? (
+                <>
+                  <Link 
+                    to="/dashboard"
+                    className="px-5 py-2.5 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors hover:-translate-y-0.5 transform"
+                  >
+                    Dashboard
+                  </Link>
+                  <button 
+                    onClick={logout}
+                    className="px-5 py-2.5 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link 
+                    to="/auth"
+                    className="px-5 py-2.5 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/auth"
+                    className="px-5 py-2.5 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors hover:-translate-y-0.5 transform"
+                  >
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -126,20 +147,43 @@ export default function Navbar() {
                 )
               ))}
               <div className="pt-4 flex flex-col space-y-3">
-                <Link
-                  to="/auth"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center px-5 py-3 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/auth"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center px-5 py-3 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors"
-                >
-                  Get Started
-                </Link>
+                {user ? (
+                  <>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-center px-5 py-3 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors"
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setMobileMenuOpen(false);
+                      }}
+                      className="w-full text-center px-5 py-3 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/auth"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-center px-5 py-3 rounded-full font-medium text-orange-500 border-2 border-orange-500 hover:bg-orange-50 transition-colors"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/auth"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full text-center px-5 py-3 rounded-full font-medium bg-orange-500 text-white shadow-md hover:bg-orange-600 transition-colors"
+                    >
+                      Get Started
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>

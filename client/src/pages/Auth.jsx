@@ -89,37 +89,37 @@ const Auth = () => {
       </div>
 
       {/* Right side */}
-      <div className="flex-1 flex items-center justify-center bg-slate-900 p-8">
-        <div className="max-w-md w-full bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700">
-          <div className="flex mb-8 bg-slate-900 rounded-lg p-1">
+      <div className="flex-1 flex items-center justify-center bg-slate-50 p-8">
+        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-200">
+          <div className="flex mb-8 bg-slate-100 rounded-lg p-1">
             <button 
-              className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${isLogin ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${isLogin ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
               onClick={() => setIsLogin(true)}
             >
               Login
             </button>
             <button 
-              className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${!isLogin ? 'bg-orange-500 text-white' : 'text-slate-400 hover:text-white'}`}
+              className={`flex-1 py-3 text-sm font-medium rounded-md transition-colors ${!isLogin ? 'bg-orange-500 text-white shadow-sm' : 'text-slate-500 hover:text-slate-900'}`}
               onClick={() => setIsLogin(false)}
             >
               Register
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 text-slate-900">
             {!isLogin && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Full Name</label>
-                  <input type="text" name="fullName" required onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                  <input type="text" name="fullName" required onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-slate-900" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Organization</label>
-                  <input type="text" name="organization" required onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Organization</label>
+                  <input type="text" name="organization" required onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-slate-900" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-1">Role</label>
-                  <select name="role" onChange={handleChange} value={formData.role} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                  <select name="role" onChange={handleChange} value={formData.role} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-slate-900">
                     <option value="farmer">Farmer</option>
                     <option value="processor">Processor</option>
                     <option value="distributor">Distributor</option>
@@ -130,19 +130,19 @@ const Auth = () => {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
-              <input type="email" name="email" required onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors" />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input type="email" name="email" required onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-slate-900" />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
-              <input type="password" name="password" required onChange={handleChange} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors" />
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <input type="password" name="password" required onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all text-slate-900" />
             </div>
 
             <button 
               type="submit" 
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg mt-6 transition-colors flex items-center justify-center disabled:opacity-50"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-4 rounded-lg mt-6 transition-colors flex items-center justify-center disabled:opacity-50 shadow-md shadow-orange-500/20"
             >
               {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (isLogin ? 'Login' : 'Create Account')}
             </button>

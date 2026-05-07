@@ -70,39 +70,39 @@ const ChatbotWidget = ({ productContext = null }) => {
       
       {/* Expanded State */}
       {isOpen && (
-        <div className="bg-white text-slate-800 w-full max-w-[380px] h-[500px] mb-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-slate-200 transition-all origin-bottom-right">
+        <div className="bg-white text-gray-900 w-full max-w-[380px] h-[500px] mb-4 rounded-2xl shadow-[0_10px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-200 transition-all origin-bottom-right">
           
-          <div className="bg-slate-900 text-white px-5 py-4 flex justify-between items-center z-10 shadow-md">
+          <div className="bg-white text-gray-900 px-5 py-4 flex justify-between items-center z-10 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="relative">
-                <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                  <Bot className="w-6 h-6 text-orange-600" />
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-900 rounded-full"></span>
+                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
               </div>
               <div>
                 <h3 className="font-bold text-base leading-tight">TraceBot</h3>
-                <p className="text-xs text-slate-300 font-medium tracking-wide">AI Supply Chain Assistant</p>
+                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">AI Supply Chain Assistant</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white hover:bg-slate-800 p-1 rounded-full transition-colors">
+            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-full transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 bg-slate-50 flex flex-col gap-3">
+          <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 flex flex-col gap-3">
             {messages.map((msg, i) => (
-              <div key={i} className={`flex max-w-[85%] ${msg.role === 'user' ? 'self-end bg-orange-500 text-white rounded-l-2xl rounded-tr-2xl' : 'self-start bg-white border border-slate-200 text-slate-800 rounded-r-2xl rounded-tl-2xl shadow-sm'} p-3 text-sm`}>
+              <div key={i} className={`flex max-w-[85%] ${msg.role === 'user' ? 'self-end bg-orange-500 text-white rounded-2xl rounded-tr-sm shadow-orange-200 shadow-md' : 'self-start bg-white border border-slate-200 text-gray-800 rounded-2xl rounded-tl-sm shadow-sm'} p-3 text-sm`}>
                 <div className="whitespace-pre-wrap">{msg.text}</div>
               </div>
             ))}
             
             {loading && (
-              <div className="self-start bg-white border border-slate-200 rounded-r-2xl rounded-tl-2xl p-4 shadow-sm">
+              <div className="self-start bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm">
                 <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.1s'}}></div>
-                  <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay:'0.1s'}}></div>
+                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
                 </div>
               </div>
             )}
@@ -119,17 +119,17 @@ const ChatbotWidget = ({ productContext = null }) => {
             )}
           </div>
 
-          <div className="p-3 bg-white border-t border-slate-200">
+          <div className="p-3 bg-white border-t border-slate-100">
             <form onSubmit={e => { e.preventDefault(); handleSend(); }} className="flex gap-2">
               <input 
                 value={inputMsg}
                 onChange={e => setInputMsg(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 bg-slate-100 border-none rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                className="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
               />
               <button 
                 type="submit" disabled={!inputMsg.trim() || loading}
-                className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white p-2.5 rounded-full transition-colors flex items-center justify-center min-w-[40px] shadow-sm"
+                className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-200 text-white p-2.5 rounded-full transition-all flex items-center justify-center min-w-[40px] shadow-sm active:scale-95"
               >
                 <Send className="w-4 h-4 ml-0.5" />
               </button>

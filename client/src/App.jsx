@@ -40,7 +40,7 @@ function App() {
   return (
     <AuthProvider>
       <Toaster position="top-right" />
-      <div className="min-h-screen bg-slate-900 text-slate-100 font-sans">
+      <div className="min-h-screen bg-[#f8fafc] text-gray-900 font-sans">
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/auth" element={<Auth />} />

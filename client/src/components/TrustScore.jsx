@@ -18,7 +18,7 @@ const TrustScore = ({ score }) => {
             cy="50"
             r={radius}
             fill="transparent"
-            stroke="#334155"
+            stroke="#f1f5f9"
             strokeWidth="8"
           />
           <circle
@@ -34,9 +34,9 @@ const TrustScore = ({ score }) => {
             className="transition-all duration-1000 ease-in-out"
           />
         </svg>
-        <span className="absolute text-2xl font-bold" style={{ color }}>{score}</span>
+        <span className="absolute text-2xl font-black text-gray-900">{score}</span>
       </div>
-      <span className="text-slate-400 text-sm mt-2 font-medium">Trust Score</span>
+      <span className="text-gray-500 text-xs mt-2 font-bold uppercase tracking-wider">Trust Score</span>
     </div>
   );
 };

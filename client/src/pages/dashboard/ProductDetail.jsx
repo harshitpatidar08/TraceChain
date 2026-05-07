@@ -66,10 +66,10 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-slate-300">
+      <div className="flex flex-col items-center justify-center py-32 text-gray-400">
         <Loader2 className="w-12 h-12 text-orange-500 animate-spin mb-4" />
-        <h2 className="text-xl font-semibold">Loading Blockchain Ledger...</h2>
-        <p className="text-sm text-slate-500 mt-2 font-mono">Verifying block integrity for {traceId}</p>
+        <h2 className="text-xl font-bold text-gray-900 font-poppins">Loading Blockchain Ledger...</h2>
+        <p className="text-sm text-gray-500 mt-2 font-mono bg-gray-100 px-3 py-1 rounded-full border border-slate-200">Verifying block integrity for {traceId}</p>
       </div>
     );
   }
@@ -77,11 +77,13 @@ const ProductDetail = () => {
   if (error || !data) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="bg-slate-800 p-8 rounded-2xl max-w-md w-full text-center shadow-xl border border-slate-700">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4 opacity-80" />
-          <h2 className="text-2xl font-bold text-white mb-2">Product Not Found</h2>
-          <p className="text-slate-400 font-mono text-sm mb-8">{traceId}</p>
-          <button onClick={() => navigate('/dashboard/search')} className="bg-orange-500 hover:bg-orange-600 text-white w-full py-3 rounded-xl font-bold transition-colors">
+        <div className="bg-white p-10 rounded-3xl max-w-md w-full text-center shadow-2xl border border-slate-200">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-12 h-12 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2 font-poppins">Product Not Found</h2>
+          <p className="text-gray-500 font-mono text-xs mb-8 bg-gray-50 py-2 rounded-lg border border-slate-100">{traceId}</p>
+          <button onClick={() => navigate('/dashboard/search')} className="bg-orange-500 hover:bg-orange-600 text-white w-full py-4 rounded-xl font-bold transition-all shadow-lg shadow-orange-500/10 active:scale-95">
             Back to Search
           </button>
         </div>
@@ -93,9 +95,9 @@ const ProductDetail = () => {
   const { score, gapAnalysis } = computed;
 
   // Render product identity card status mapping
-  let statusBadge = "bg-green-500/20 text-green-400";
-  if (product.status === 'recalled') statusBadge = "bg-red-500/20 text-red-400";
-  if (product.status === 'expired') statusBadge = "bg-yellow-500/20 text-yellow-400";
+  let statusBadge = "bg-green-100 text-green-700 border-green-200";
+  if (product.status === 'recalled') statusBadge = "bg-red-100 text-red-700 border-red-200";
+  if (product.status === 'expired') statusBadge = "bg-amber-100 text-amber-700 border-amber-200";
 
   const getExpiryInfo = (expDate) => {
     if (!expDate) return { label: 'No expiry', color: 'gray' };
@@ -119,7 +121,7 @@ const ProductDetail = () => {
         <div className="flex justify-end mb-4">
           <Link 
             to={`/dashboard/scan`} 
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition-colors flex items-center gap-2 shadow-lg shadow-orange-500/20"
+            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/10 active:scale-95"
           >
             <ScanLine className="w-5 h-5" /> Log New Event
           </Link>
@@ -127,46 +129,50 @@ const ProductDetail = () => {
       )}
 
       {/* TOP: Identity Card */}
-      <div className="bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-700 flex flex-col md:flex-row gap-8 items-start md:items-center">
-        <div className="flex-1 space-y-4 w-full">
+      <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row gap-8 items-start md:items-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none rotate-12">
+          <Package className="w-48 h-48 text-orange-500" />
+        </div>
+        
+        <div className="flex-1 space-y-5 w-full relative z-10">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-slate-300">
+            <span className="bg-gray-50 border border-slate-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-500">
               {product.brand || 'No Brand'}
             </span>
-            <span className="bg-orange-500/20 text-orange-400 px-3 py-1 rounded-full text-xs font-bold uppercase border border-orange-500/20">
+            <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-orange-100">
               {product.category}
             </span>
-            <span className={`px-3 py-1 rounded-full border border-current text-xs font-bold uppercase ${statusBadge}`}>
+            <span className={`px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest ${statusBadge}`}>
               {product.status}
             </span>
           </div>
           
-          <h1 className="text-3xl md:text-4xl font-black text-white leading-tight">{product.name}</h1>
+          <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight font-poppins">{product.name}</h1>
           
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-medium text-slate-300 pt-2 border-t border-slate-700">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-bold text-gray-600 pt-5 border-t border-slate-100">
             <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-orange-500"/> {product.origin}</div>
             <div className="flex items-center gap-1.5">
-              <CalendarDays className={`w-4 h-4 text-${expiryInfo.color}-500`}/> 
-              <span className={`text-${expiryInfo.color}-400 font-bold`}>{expiryInfo.label}</span>
+              <CalendarDays className={`w-4 h-4 text-${expiryInfo.color === 'green' ? 'green' : expiryInfo.color === 'orange' ? 'orange' : 'red'}-500`}/> 
+              <span className={`text-${expiryInfo.color === 'green' ? 'green' : expiryInfo.color === 'orange' ? 'orange' : 'red'}-600`}>{expiryInfo.label}</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-slate-900/80 px-2 py-1 rounded-md cursor-pointer hover:bg-slate-700 transition-colors border border-slate-700" onClick={() => {navigator.clipboard.writeText(product.id); toast.success('Trace ID Copied');}}>
-              <span className="font-mono text-orange-400 tracking-wider text-xs">ID: {product.id}</span>
-              <Copy className="w-3.5 h-3.5 text-slate-400"/>
+            <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-gray-100 transition-all border border-slate-100" onClick={() => {navigator.clipboard.writeText(product.id); toast.success('Trace ID Copied');}}>
+              <span className="font-mono text-orange-600 tracking-wider text-xs font-bold">ID: {product.id}</span>
+              <Copy className="w-3.5 h-3.5 text-gray-400"/>
             </div>
           </div>
 
           {product.certifications?.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {product.certifications.map(c => (
-                 <span key={c} className="flex items-center gap-1 text-[10px] font-bold bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded uppercase tracking-wider">
-                   <ShieldCheck className="w-3 h-3" /> {c}
+                 <span key={c} className="flex items-center gap-1.5 text-[10px] font-bold bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                   <ShieldCheck className="w-3.5 h-3.5" /> {c}
                  </span>
               ))}
             </div>
           )}
         </div>
         
-        <div className="w-full md:w-auto flex justify-center md:border-l md:border-slate-700 md:pl-8 pt-4 md:pt-0 border-t border-slate-700">
+        <div className="w-full md:w-auto flex justify-center md:border-l md:border-slate-100 md:pl-10 pt-4 md:pt-0 border-t border-slate-100 relative z-10">
           <TrustScore score={score} />
         </div>
       </div>
@@ -175,30 +181,30 @@ const ProductDetail = () => {
          {/* MIDDLE: AI Insights */}
          <AIInsightBox product={product} events={events} gapAnalysis={gapAnalysis} />
          
-         <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 flex flex-col justify-center shadow-lg">
-           <h3 className="text-slate-400 font-bold text-sm uppercase mb-4 tracking-wider flex items-center gap-2">
+         <div className="bg-white p-8 rounded-3xl border border-slate-200 flex flex-col justify-center shadow-xl">
+           <h3 className="text-gray-400 font-bold text-[10px] uppercase mb-6 tracking-widest flex items-center gap-2">
              <ShieldCheck className="w-4 h-4 text-emerald-500" /> Chain Integrity
            </h3>
            <div className="space-y-4">
-             <div className="flex justify-between items-center border-b border-slate-700/50 pb-3">
-               <span className="text-slate-400 font-medium">Event Count</span>
-               <span className="font-bold text-white text-lg bg-slate-900 px-3 py-0.5 rounded-md border border-slate-700">{events.length}</span>
+             <div className="flex justify-between items-center border-b border-slate-50 pb-4">
+               <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Event Count</span>
+               <span className="font-black text-gray-900 text-xl bg-gray-50 px-4 py-1 rounded-xl border border-slate-100">{events.length}</span>
              </div>
              {events.length > 0 && (
                <>
-                 <div className="flex justify-between items-center border-b border-slate-700/50 pb-3">
-                   <span className="text-slate-400 font-medium">Ledger Genesis</span>
-                   <span className="font-mono text-sm text-slate-300">{new Date(events[0].created_at).toLocaleDateString()}</span>
+                 <div className="flex justify-between items-center border-b border-slate-50 pb-4">
+                   <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Ledger Genesis</span>
+                   <span className="font-mono text-sm text-gray-700 font-bold tracking-tight">{new Date(events[0].created_at).toLocaleDateString()}</span>
                  </div>
-                 <div className="flex justify-between items-center border-b border-slate-700/50 pb-3">
-                   <span className="text-slate-400 font-medium">Last Event</span>
-                   <span className="font-mono text-sm text-slate-300">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
+                 <div className="flex justify-between items-center border-b border-slate-50 pb-4">
+                   <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Last Event</span>
+                   <span className="font-mono text-sm text-gray-700 font-bold tracking-tight">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
                  </div>
                </>
              )}
-             <div className="flex justify-between items-center pt-1">
-               <span className="text-slate-400 font-medium">Verification</span>
-               <span className="px-2.5 py-1 bg-orange-500/10 rounded-md font-mono text-xs text-orange-400 border border-orange-500/20 uppercase font-bold tracking-wider">
+             <div className="flex justify-between items-center pt-2">
+               <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Verification</span>
+               <span className="px-3 py-1.5 bg-orange-50 rounded-full font-mono text-[10px] text-orange-600 border border-orange-100 uppercase font-black tracking-widest">
                  SHA-256 Hashed
                </span>
              </div>
@@ -207,8 +213,8 @@ const ProductDetail = () => {
       </div>
 
       {/* BOTTOM: Timeline */}
-      <div className="bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-700 overflow-hidden">
-        <h2 className="text-xl font-bold mb-8 flex items-center gap-3 text-white border-b border-slate-700 pb-4">
+      <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+        <h2 className="text-xl font-black mb-8 flex items-center gap-3 text-gray-900 border-b border-slate-100 pb-6 font-poppins uppercase tracking-wider text-base">
            <MapPin className="text-orange-500 w-6 h-6" /> Supply Chain Journey Map
         </h2>
         <SupplyChainTimeline events={events} currentStage={product.current_stage} gapAnalysis={gapAnalysis} />

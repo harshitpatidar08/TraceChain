@@ -17,10 +17,10 @@ const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
 
   return (
     <div className="w-full py-8 overflow-x-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center min-w-[700px] relative px-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center min-w-[700px] relative px-8">
         
         {/* Background Line */}
-        <div className="absolute top-[28px] left-[40px] right-[40px] h-1 bg-slate-700 hidden md:block z-0"></div>
+        <div className="absolute top-[32px] left-[60px] right-[60px] h-[3px] bg-slate-100 hidden md:block z-0 rounded-full"></div>
 
         {STAGES.map((stage, index) => {
           const event = events.find(e => e.stage === stage.id);
@@ -31,24 +31,21 @@ const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
           const isDelayed = gapAnalysis?.delayedStages?.includes(stage.id);
 
           // Status colors logic
-          let circleClasses = "w-14 h-14 rounded-full flex items-center justify-center z-10 border-4 transition-all ";
-          let lineClasses = "hidden md:block absolute top-[28px] left-0 h-1 z-0 transition-all ";
-          let textClasses = "text-sm font-bold mt-4 text-center w-full ";
+          let circleClasses = "w-16 h-16 rounded-full flex items-center justify-center z-10 border-[6px] transition-all duration-300 ";
+          let textClasses = "text-xs font-black mt-5 text-center w-full uppercase tracking-widest ";
 
           if (isCompleted) {
-            circleClasses += "bg-green-500 border-green-900 shadow-[0_0_15px_rgba(34,197,94,0.4)]";
-            textClasses += "text-green-400";
-            if (index > 0) lineClasses += "bg-green-500";
+            circleClasses += "bg-green-500 border-green-50 shadow-lg shadow-green-500/20";
+            textClasses += "text-green-600";
           } else if (isCurrent) {
-            circleClasses += "bg-orange-500 border-orange-900 animate-pulse shadow-[0_0_20px_rgba(249,115,22,0.6)]";
-            textClasses += "text-orange-400";
-            if (index > 0) lineClasses += "bg-orange-500/50 dashed";
+            circleClasses += "bg-orange-500 border-orange-50 animate-pulse shadow-xl shadow-orange-500/30 scale-110";
+            textClasses += "text-orange-600";
           } else if (isMissing) {
-            circleClasses += "bg-slate-800 border-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]";
+            circleClasses += "bg-white border-red-100 shadow-md";
             textClasses += "text-red-500";
           } else {
-            circleClasses += "bg-slate-800 border-slate-700";
-            textClasses += "text-slate-500";
+            circleClasses += "bg-white border-slate-100";
+            textClasses += "text-gray-300";
           }
 
           // Positioning logic for connecting lines (simplified visual trick for web)
@@ -62,50 +59,48 @@ const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
               {/* Connector line (desktop) */}
               {index > 0 && (
                 <div 
-                  className={`absolute top-[28px] -left-1/2 w-full h-1 -z-10 ${isCompleted || isCurrent ? 'bg-orange-500' : 'bg-slate-700'}`} 
-                  style={{ background: isCompleted ? '#22c55e' : isCurrent ? 'linear-gradient(90deg, #22c55e 50%, #334155 50%)' : '#334155' }}
+                  className={`absolute top-[32px] -left-1/2 w-full h-[3px] -z-10 rounded-full`} 
+                  style={{ background: isCompleted ? '#22c55e' : isCurrent ? 'linear-gradient(90deg, #22c55e 50%, #f1f5f9 50%)' : '#f1f5f9' }}
                 />
               )}
 
               {/* Warning Tags above circles */}
-              <div className="h-10 w-full flex justify-center items-end pb-2 absolute -top-12">
-                {isDelayed && <span className="bg-orange-500/20 text-orange-400 text-[10px] uppercase px-2 py-1 rounded border border-orange-500/30 flex items-center gap-1 font-bold"><Clock className="w-3 h-3"/> Delayed</span>}
-                {isMissing && <span className="bg-red-500/20 text-red-500 text-[10px] uppercase px-2 py-1 rounded border border-red-500/30 flex items-center gap-1 font-bold"><ShieldAlert className="w-3 h-3"/> Missing</span>}
+              <div className="h-10 w-full flex justify-center items-end pb-3 absolute -top-14">
+                {isDelayed && <span className="bg-amber-50 text-amber-600 text-[9px] uppercase px-2.5 py-1 rounded-full border border-amber-100 flex items-center gap-1 font-black shadow-sm tracking-widest animate-bounce"><Clock className="w-3 h-3"/> Delayed</span>}
+                {isMissing && <span className="bg-red-50 text-red-600 text-[9px] uppercase px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1 font-black shadow-sm tracking-widest"><ShieldAlert className="w-3 h-3"/> Missing</span>}
               </div>
 
               {/* Stage Circle */}
               <div 
-                className={`${circleClasses} cursor-pointer hover:scale-105`}
+                className={`${circleClasses} cursor-pointer group/circle`}
                 onClick={() => event && setExpandedStage(expandedStage === stage.id ? null : stage.id)}
               >
-                {isCompleted ? <Check className="w-6 h-6 text-white" /> : <div className="w-4 h-4 rounded-full bg-current opacity-50" />}
+                {isCompleted ? <Check className="w-6 h-6 text-white" /> : <div className="w-4 h-4 rounded-full bg-current opacity-20 group-hover/circle:opacity-50 transition-opacity" />}
               </div>
 
               <div className={textClasses}>{stage.label}</div>
 
-              {/* Expanded Card Details (Absolutely positioned below for desktop, relative for mobile) */}
+              {/* Expanded Card Details */}
               {expandedStage === stage.id && event && (
-                <div className="absolute top-28 left-1/2 -translate-x-1/2 w-64 bg-slate-800 border border-slate-600 rounded-xl p-4 shadow-2xl z-20 text-left">
-                  <div className="flex justify-between items-center mb-2 pb-2 border-b border-slate-700">
-                    <span className="text-xs bg-slate-700 text-slate-300 px-2 py-1 rounded">{event.role}</span>
-                    <span className="text-xs text-slate-400">{new Date(event.created_at).toLocaleDateString()}</span>
+                <div className="absolute top-32 left-1/2 -translate-x-1/2 w-72 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-2xl z-20 text-left animate-in fade-in zoom-in duration-200">
+                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-50">
+                    <span className="text-[9px] bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full border border-slate-100 uppercase font-black tracking-widest">{event.role}</span>
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{new Date(event.created_at).toLocaleDateString()}</span>
                   </div>
-                  <h4 className="font-bold text-white mb-1">{event.actor}</h4>
-                  <div className="flex items-center gap-2 text-xs text-slate-300 mb-3"><MapPin className="w-3 h-3 text-orange-500" /> {event.location}</div>
+                  <h4 className="font-black text-gray-900 mb-1 text-sm font-poppins">{event.actor}</h4>
+                  <div className="flex items-center gap-2 text-[11px] text-gray-500 mb-4 font-bold tracking-tight"><MapPin className="w-3.5 h-3.5 text-orange-500" /> {event.location}</div>
                   
                   {(event.temperature || event.humidity) && (
-                    <div className="bg-slate-900 rounded p-2 mb-3 flex justify-between text-xs font-mono">
-                      {event.temperature && <div>T: <span className="text-orange-400">{event.temperature}°C</span></div>}
-                      {event.humidity && <div>H: <span className="text-blue-400">{event.humidity}%</span></div>}
+                    <div className="bg-gray-50 rounded-2xl p-3 mb-4 flex justify-between text-[11px] font-mono border border-slate-100">
+                      {event.temperature && <div>T: <span className="text-orange-600 font-black">{event.temperature}°C</span></div>}
+                      {event.humidity && <div>H: <span className="text-blue-600 font-black">{event.humidity}%</span></div>}
                     </div>
                   )}
-
-                  {event.notes && <p className="text-xs text-slate-400 mb-3 bg-slate-900/50 p-2 rounded italic">"{event.notes}"</p>}
-
-                  <div className="text-[10px] text-slate-500 font-mono break-all group relative cursor-help">
-                    <span className="font-bold">HASH:</span> {event.event_hash.substring(0, 16)}...
-                    <div className="hidden group-hover:block absolute bottom-full mb-2 -left-4 w-48 bg-black text-white p-2 rounded text-[10px] z-30">
-                      This cryptographic hash ensures event data was not tampered with.
+                  {event.notes && <p className="text-[11px] text-gray-500 mb-4 bg-gray-50/80 p-3 rounded-2xl italic border border-slate-100/50 leading-relaxed">"{event.notes}"</p>}
+                  <div className="text-[9px] text-gray-400 font-mono break-all group/hash relative cursor-help bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <span className="font-black text-gray-400 uppercase mr-1">Hash:</span> {event.event_hash.substring(0, 24)}...
+                    <div className="hidden group-hover/hash:block absolute bottom-full mb-3 -left-4 w-56 bg-gray-900 text-white p-3 rounded-2xl text-[10px] z-30 shadow-2xl leading-relaxed">
+                      This cryptographic hash ensures event data was not tampered with on the immutable ledger.
                     </div>
                   </div>
                 </div>

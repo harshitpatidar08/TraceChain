@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import ChatbotWidget from './ChatbotWidget';
 import { 
   Menu, X, LogOut, Bell, Zap, Package, Plus, ListOrdered, 
   Search, User, ScanLine, LayoutDashboard, Boxes, 
@@ -66,11 +67,11 @@ const AppLayout = () => {
   const displayName = user?.user_metadata?.display_name || user?.email || 'User';
 
   const SidebarContent = (
-    <div className="flex flex-col h-full bg-slate-800 border-r border-slate-700 w-64">
+    <div className="flex flex-col h-full bg-white border-r border-slate-200 w-64">
       {/* Top section */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-700">
+      <div className="h-16 flex items-center px-6 border-b border-slate-200">
         <Zap className="w-6 h-6 text-orange-500 mr-2" />
-        <span className="text-xl font-bold text-white">TraceChain</span>
+        <span className="text-xl font-bold text-gray-900">TraceChain</span>
       </div>
 
       {/* Middle section (nav links) */}
@@ -83,8 +84,8 @@ const AppLayout = () => {
             className={({ isActive }) =>
               `flex items-center px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
                 isActive
-                  ? 'border-l-4 border-orange-500 bg-slate-700/50 text-orange-400'
-                  : 'text-slate-400 hover:bg-slate-700/30 hover:text-white'
+                  ? 'border-l-4 border-orange-500 bg-orange-50 text-orange-600'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
               }`
             }
           >
@@ -95,21 +96,21 @@ const AppLayout = () => {
       </div>
 
       {/* Bottom section */}
-      <div className="p-4 border-t border-slate-700 bg-slate-800/50">
+      <div className="p-4 border-t border-slate-200 bg-white">
         <div className="flex items-center space-x-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold shrink-0">
             {getInitials(displayName)}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-white truncate">{displayName}</p>
-            <span className="inline-block px-2 py-0.5 mt-1 bg-orange-500/20 text-orange-400 rounded-full text-xs font-medium uppercase tracking-wider">
+            <p className="text-sm font-bold text-gray-900 truncate">{displayName}</p>
+            <span className="inline-block px-3 py-0.5 mt-1 bg-orange-100 text-orange-700 rounded-full text-[10px] font-bold uppercase tracking-wider">
               {role}
             </span>
           </div>
         </div>
         <button
           onClick={logout}
-          className="w-full flex items-center justify-center px-4 py-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+          className="w-full flex items-center justify-center px-4 py-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
         >
           <LogOut className="w-4 h-4 mr-2" />
           <span className="text-sm font-medium">Logout</span>
@@ -119,7 +120,7 @@ const AppLayout = () => {
   );
 
   return (
-    <div className="flex h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden">
+    <div className="flex h-screen bg-[#f8fafc] text-gray-900 font-sans overflow-hidden">
       {/* Desktop Sidebar */}
       <div className="hidden md:block shrink-0">
         {SidebarContent}
@@ -141,7 +142,7 @@ const AppLayout = () => {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', bounce: 0, duration: 0.3 }}
-              className="fixed inset-y-0 left-0 w-64 z-50 md:hidden shadow-2xl"
+              className="fixed inset-y-0 left-0 w-64 z-50 md:hidden shadow-2xl bg-white"
             >
               {SidebarContent}
             </motion.div>
@@ -152,24 +153,24 @@ const AppLayout = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 bg-slate-800/50 border-b border-slate-700 flex items-center justify-between px-4 md:px-8 shrink-0">
+        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shrink-0">
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="mr-4 md:hidden p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors"
+              className="mr-4 md:hidden p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-xl font-semibold text-white truncate">{getPageTitle()}</h1>
+            <h1 className="text-xl font-bold text-gray-900 truncate font-poppins">{getPageTitle()}</h1>
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-slate-400 hover:text-white transition-colors">
+            <button className="relative p-2 text-gray-400 hover:text-gray-900 transition-colors">
               <Bell className="w-5 h-5" />
               {/* Fake notification badge for design */}
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <span className="text-sm font-medium text-slate-300 hidden sm:block truncate max-w-[150px]">
+            <span className="text-sm font-medium text-gray-500 hidden sm:block truncate max-w-[150px]">
               {user?.email}
             </span>
           </div>
@@ -180,6 +181,9 @@ const AppLayout = () => {
           <Outlet />
         </main>
       </div>
+      
+      {/* Global Chatbot for Dashboard */}
+      <ChatbotWidget />
     </div>
   );
 };

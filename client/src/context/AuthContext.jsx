@@ -12,18 +12,28 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    let mounted = true;
+
     const initAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await fetchRole(session.user.id, session.user.user_metadata);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+          await fetchRole(session.user.id, session.user.user_metadata);
+        }
+      } catch (err) {
+        console.error('Error fetching session:', err);
+      } finally {
+        if (mounted) setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'INITIAL_SESSION') return;
+      
+      if (mounted) setLoading(true);
       if (session?.user) {
         setUser(session.user);
         await fetchRole(session.user.id, session.user.user_metadata);
@@ -31,10 +41,13 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setRole(null);
       }
-      setLoading(false);
+      if (mounted) setLoading(false);
     });
 
-    return () => authListener.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   const fetchRole = async (userId, userMetadata = null) => {
@@ -76,11 +89,11 @@ export const AuthProvider = ({ children }) => {
         
         // Redirect based on role
         if (userRole) {
-          navigate(`/dashboard/${userRole}`);
+          navigate('/dashboard');
         } else {
           // If no role found even in metadata, default to farmer or show error
           toast.error("Account profile not fully set up.");
-          navigate('/dashboard/farmer');
+          navigate('/dashboard');
         }
       }
       
@@ -141,7 +154,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         toast.success('Account created successfully!');
-        navigate(`/dashboard/${selectedRole}`);
+        navigate('/dashboard');
         return true;
       }
       

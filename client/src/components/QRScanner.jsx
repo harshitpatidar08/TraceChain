@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, Loader2, AlertCircle, X, Image as ImageIcon } from 'lucide-react';
 
-const QRScanner = ({ onScan }) => {
+const QRScanner = ({ onScan, theme = 'light' }) => {
+  const isDark = theme === 'dark';
   const [error, setError] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -123,13 +124,13 @@ const QRScanner = ({ onScan }) => {
         <div className="w-full flex flex-col gap-4">
           <button
             onClick={startScanner}
-            className="w-full bg-slate-800 hover:bg-slate-700 text-white p-8 rounded-3xl shadow-xl border border-slate-700 flex flex-col items-center justify-center transition-all group"
+            className={`w-full ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200'} p-8 rounded-xl shadow-xl border flex flex-col items-center justify-center transition-all group`}
           >
-            <div className="w-16 h-16 bg-orange-500/20 rounded-2xl flex items-center justify-center mb-4 border border-orange-500/30 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-orange-500/20 rounded-xl flex items-center justify-center mb-4 border border-orange-500/30 group-hover:scale-110 transition-transform">
               <Camera className="w-8 h-8 text-orange-500" />
             </div>
             <span className="font-bold text-lg">Tap to Scan via Camera</span>
-            <span className="text-slate-400 text-sm mt-2">Requires camera permission</span>
+            <span className={`${isDark ? 'text-slate-400' : 'text-slate-500'} text-sm mt-2`}>Requires camera permission</span>
           </button>
           
           <input 
@@ -142,14 +143,14 @@ const QRScanner = ({ onScan }) => {
           <button 
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="w-full bg-slate-800 hover:bg-slate-700 text-white py-4 px-6 rounded-2xl shadow-sm border border-slate-700 flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
+            className={`w-full ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700' : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200'} py-4 px-6 rounded-xl shadow-sm border flex items-center justify-center gap-3 transition-colors disabled:opacity-50`}
           >
-            {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-orange-400" /> : <ImageIcon className="w-5 h-5 text-orange-400" />}
-            <span className="font-semibold text-slate-200">Upload QR Image</span>
+            {isUploading ? <Loader2 className="w-5 h-5 animate-spin text-orange-500" /> : <ImageIcon className="w-5 h-5 text-orange-500" />}
+            <span className="font-semibold">Upload QR Image</span>
           </button>
         </div>
       ) : (
-        <div className="relative bg-slate-800 p-4 rounded-3xl shadow-xl border border-slate-700 w-full overflow-hidden">
+        <div className={`relative ${isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} p-4 rounded-xl shadow-xl border w-full overflow-hidden`}>
           {/* Close button */}
           <button 
             onClick={stopScanner}
