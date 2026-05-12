@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
-import { ListOrdered, Loader2, ArrowRight } from 'lucide-react';
+import { ListOrdered, Loader2, ArrowRight, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 
@@ -36,66 +36,89 @@ const MyEvents = () => {
     }
   }, [user]);
 
+  const stageColors = {
+    farming: 'bg-emerald-100 text-emerald-700',
+    processing: 'bg-blue-100 text-blue-700',
+    distribution: 'bg-purple-100 text-purple-700',
+    retail: 'bg-orange-100 text-orange-700',
+    consumer: 'bg-slate-100 text-slate-700'
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <div className="flex justify-between items-end bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-poppins">
-            <ListOrdered className="text-orange-500 w-6 h-6" /> My Logged Events
-          </h2>
-          <p className="text-gray-500 text-sm mt-1">History of all supply chain events you have added to the blockchain.</p>
+      
+      {/* Header Card */}
+      <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-[36px] p-8 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-52 h-52 bg-emerald-100 rounded-full blur-3xl opacity-20" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                <ListOrdered className="w-5 h-5 text-emerald-600" />
+              </div>
+              <span className="text-xs font-black uppercase tracking-widest text-slate-400">History</span>
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-slate-900">My Logged Events</h2>
+            <p className="text-slate-500 mt-1 text-sm">History of all supply chain events you have added to the blockchain.</p>
+          </div>
+          {events.length > 0 && (
+            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl px-5 py-3 text-center shrink-0">
+              <p className="text-3xl font-black text-slate-900">{events.length}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">Total Events</p>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+      {/* Events Table */}
+      <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mb-3" />
+            <p className="text-slate-400 font-medium">Loading your events...</p>
           </div>
         ) : events.length === 0 ? (
           <div className="p-16 text-center">
-            <div className="w-20 h-20 bg-gray-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ListOrdered className="w-10 h-10 text-gray-300" />
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <ListOrdered className="w-10 h-10 text-slate-300" />
             </div>
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No events logged yet</h3>
-            <p className="text-gray-500 mb-6">You haven't appended any events to products.</p>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No events logged yet</h3>
+            <p className="text-slate-500 mb-6">You haven't appended any events to products.</p>
             {role !== 'farmer' && (
-              <Link to="/dashboard/scan" className="inline-flex bg-orange-500 hover:bg-orange-600 transition-all px-6 py-2.5 rounded-xl font-bold text-white items-center gap-2 shadow-md active:scale-95">
+              <Link to="/dashboard/scan" className="inline-flex bg-slate-900 hover:bg-slate-800 transition-all px-6 py-3 rounded-2xl font-semibold text-white items-center gap-2 shadow-sm">
                 Go to Scan & Log <ArrowRight className="w-4 h-4" />
               </Link>
             )}
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-700 whitespace-nowrap">
-              <thead className="bg-gray-50/50 text-gray-400 font-bold uppercase text-[10px] tracking-widest border-b border-slate-100">
+            <table className="w-full text-left text-sm whitespace-nowrap">
+              <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  <th className="px-6 py-4">Product Name</th>
-                  <th className="px-6 py-4">Stage</th>
-                  <th className="px-6 py-4">Location</th>
-                  <th className="px-6 py-4">Temp</th>
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Transaction Hash</th>
+                  {['Product Name', 'Stage', 'Location', 'Temp', 'Date', 'Transaction Hash'].map(h => (
+                    <th key={h} className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">{h}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {events.map(ev => (
-                  <tr key={ev.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-bold text-gray-900">
-                      <Link to={`/dashboard/product/${ev.product_id}`} className="hover:text-orange-500 transition-colors flex items-center gap-2">
+                  <tr key={ev.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <Link to={`/dashboard/product/${ev.product_id}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-slate-400" />
                         {ev.product?.name || ev.product_id}
                       </Link>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="bg-orange-50 text-orange-700 border border-orange-100 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${stageColors[ev.stage] || 'bg-slate-100 text-slate-600'}`}>
                         {ev.stage}
                       </span>
                     </td>
-                    <td className="px-6 py-4 truncate max-w-[200px] font-medium text-gray-600" title={ev.location}>{ev.location}</td>
-                    <td className="px-6 py-4 font-bold text-gray-900">{ev.temperature ? `${ev.temperature}°C` : '-'}</td>
-                    <td className="px-6 py-4 text-gray-400 font-medium">{new Date(ev.created_at).toLocaleString()}</td>
+                    <td className="px-6 py-4 truncate max-w-[200px] text-slate-500" title={ev.location}>{ev.location}</td>
+                    <td className="px-6 py-4 font-semibold text-slate-900">{ev.temperature ? `${ev.temperature}°C` : '-'}</td>
+                    <td className="px-6 py-4 text-slate-400">{new Date(ev.created_at).toLocaleString()}</td>
                     <td className="px-6 py-4">
-                      <div className="font-mono text-[11px] text-orange-600 font-bold bg-orange-50 border border-orange-100 px-2.5 py-1 rounded-full inline-block tracking-wider" title={ev.event_hash}>
+                      <div className="font-mono text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full inline-block tracking-wider" title={ev.event_hash}>
                         {ev.event_hash ? `${ev.event_hash.substring(0, 12)}...` : 'Pending'}
                       </div>
                     </td>

@@ -77,7 +77,7 @@ const AllProducts = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-poppins">
-            <Package className="text-orange-500 w-6 h-6" /> All Products
+            <Package className="text-emerald-500 w-6 h-6" /> All Products
           </h2>
           <p className="text-gray-500 text-sm mt-1 font-medium">Manage global product registry and status.</p>
         </div>
@@ -92,7 +92,7 @@ const AllProducts = () => {
             placeholder="Search by name, brand, or Trace ID..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-50 border border-slate-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 rounded-xl py-3 pl-11 pr-4 outline-none text-gray-900 transition-all placeholder-gray-300 font-medium"
+            className="w-full bg-[#F8FAFC] border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-2xl py-3 pl-11 pr-4 outline-none text-slate-900 transition-all placeholder:text-slate-300 font-medium"
           />
         </div>
         
@@ -132,7 +132,7 @@ const AllProducts = () => {
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="p-16 text-center text-gray-400">
@@ -159,7 +159,7 @@ const AllProducts = () => {
                     <td className="px-6 py-4">
                       <div className="font-black text-gray-900 mb-0.5">{p.name}</div>
                       <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wide">
-                        {p.brand ? `by ${p.brand}` : 'No brand'} | <span className="font-mono text-orange-600 font-bold">TC-{p.id.substring(0, 8)}...</span>
+                        {p.brand ? `by ${p.brand}` : 'No brand'} | <span className="font-mono text-emerald-600 font-bold">TC-{p.id.substring(0, 8)}...</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 capitalize font-bold text-xs text-gray-600">{p.current_stage}</td>

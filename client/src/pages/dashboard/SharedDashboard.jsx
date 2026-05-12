@@ -128,201 +128,233 @@ const SharedDashboard = ({ roleType }) => {
     setLogLoading(false);
   };
 
+  const inputClass = 'w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all duration-300';
+
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      {/* Sidebar */}
-      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
-        <div className="p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-orange-500"><Navigation className="w-6 h-6" /> TraceChain</h2>
-        </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <button 
-            onClick={() => setActiveTab('scan')} 
-            className={`w-full text-left px-4 py-3 rounded-lg font-medium flex items-center gap-3 transition-colors ${activeTab === 'scan' ? 'bg-orange-500/10 text-orange-500' : 'text-slate-300 hover:bg-slate-700/50'}`}
-          >
-            <ScanLine className="w-5 h-5" /> Scan Product
-          </button>
-          <button 
-            onClick={() => setActiveTab('events')} 
-            className={`w-full text-left px-4 py-3 rounded-lg font-medium flex items-center gap-3 transition-colors ${activeTab === 'events' ? 'bg-orange-500/10 text-orange-500' : 'text-slate-300 hover:bg-slate-700/50'}`}
-          >
-            <ListOrdered className="w-5 h-5" /> My Events
-          </button>
-        </nav>
-      </div>
+    <div className="min-h-screen bg-[#F8FAFC]">
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="h-20 border-b border-slate-700 px-8 flex items-center justify-between bg-slate-800/50">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold capitalize">{roleType} Dashboard</h1>
-            <span className="px-3 py-1 bg-slate-700 rounded-full text-xs font-mono text-slate-300 uppercase">{role}</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-medium text-slate-300">{user?.email}</span>
-            <button onClick={logout} className="p-2 text-slate-400 hover:text-red-400 transition-colors">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
+      {/* Background Glows */}
+      <div className="fixed top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
 
-        {/* Content */}
-        <main className="p-8 flex-1 overflow-auto">
-          {activeTab === 'scan' && (
-            <div className="max-w-4xl mx-auto space-y-8">
-              
-              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-lg">
-                <h2 className="text-lg font-bold mb-4 flex items-center gap-2"><ScanLine className="text-orange-500" /> Lookup & Scan Product</h2>
-                <form onSubmit={handleSearch} className="flex gap-4">
-                  <div className="relative flex-1">
-                    <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" />
-                    <input 
-                      type="text" 
-                      placeholder="Enter Trace ID (e.g. TC-2026-FOOD-001)" 
-                      value={traceId}
-                      onChange={e => setTraceId(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700 focus:border-orange-500 rounded-lg py-3 pl-12 pr-4 transition-colors font-mono uppercase"
-                    />
-                  </div>
-                  <button type="submit" disabled={searchLoading} className="bg-orange-500 hover:bg-orange-600 text-white px-8 rounded-lg font-medium transition-colors flex items-center justify-center min-w-[120px]">
-                    {searchLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search'}
-                  </button>
-                </form>
-              </div>
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
 
-              {product && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  {/* Product Info & Alert Col */}
-                  <div className="md:col-span-1 space-y-6">
-                    <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                      <div className="flex items-center gap-3 mb-4">
-                        <Package className="w-8 h-8 text-orange-500" />
-                        <div>
-                          <h3 className="font-bold text-lg">{product.name}</h3>
-                          <p className="font-mono text-xs text-orange-400">{product.id}</p>
-                        </div>
-                      </div>
-                      <div className="space-y-3 text-sm text-slate-300">
-                        <div className="flex justify-between border-b border-slate-700 pb-2">
-                          <span className="text-slate-500">Origin</span>
-                          <span className="font-medium text-right">{product.origin}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-700 pb-2">
-                          <span className="text-slate-500">Current Stage</span>
-                          <span className="font-medium capitalize text-right">{product.current_stage}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-slate-700 pb-2">
-                          <span className="text-slate-500">Trust Score</span>
-                          <span className={`font-bold text-right ${product.trust_score > 80 ? 'text-green-500' : product.trust_score > 50 ? 'text-yellow-500' : 'text-red-500'}`}>
-                            {product.trust_score}/100
-                          </span>
-                        </div>
-                        <div className="flex justify-between pb-2">
-                          <span className="text-slate-500">Expiry</span>
-                          <span className="font-medium text-right">{new Date(product.exp_date).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {alerts.length > 0 && (
-                      <div className="bg-red-500/10 border border-red-500/50 p-5 rounded-2xl">
-                        <h4 className="flex items-center gap-2 font-bold text-red-400 mb-3"><Info className="w-5 h-5" /> AI Insight Alerts</h4>
-                        <ul className="space-y-2">
-                          {alerts.map(a => (
-                            <li key={a.id} className="text-sm text-red-300 flex items-start gap-2">
-                              <span className="mt-1 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
-                              {a.message}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Log Event Form */}
-                  <div className="md:col-span-2 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-lg">
-                    <div className="mb-6 pb-6 border-b border-slate-700 flex justify-between items-end">
-                      <div>
-                        <h2 className="text-xl font-bold mb-1 flex items-center gap-2">Log New Event</h2>
-                        <p className="text-sm text-slate-400">Appending cryptographically secure block for <strong className="text-orange-400 uppercase">{myStage}</strong> stage.</p>
-                      </div>
-                    </div>
-
-                    <form onSubmit={handleLogEvent} className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="col-span-2 flex gap-4">
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-slate-300 mb-1">Actor Name</label>
-                            <input disabled value={user?.user_metadata?.display_name || user?.email} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 opacity-70 cursor-not-allowed text-orange-200" />
-                          </div>
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-slate-300 mb-1">Location</label>
-                            <div className="flex">
-                              <input required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-l-lg px-4 py-3" />
-                              <button type="button" onClick={getLocation} className="bg-slate-700 px-4 rounded-r-lg border border-l-0 border-slate-700">
-                                {locationLoading ? <Loader2 className="w-5 h-5 animate-spin text-slate-300" /> : <MapPin className="w-5 h-5 text-slate-300" />}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-1">Temperature (°C) <span className="text-slate-500 font-normal">(Optional)</span></label>
-                          <input type="number" step="0.1" value={eventData.temperature} onChange={e => setEventData({...eventData, temperature: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-slate-300 mb-1">Humidity (%) <span className="text-slate-500 font-normal">(Optional)</span></label>
-                          <input type="number" step="0.1" value={eventData.humidity} onChange={e => setEventData({...eventData, humidity: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3" />
-                        </div>
-                        <div className="col-span-2">
-                          <label className="block text-sm font-medium text-slate-300 mb-1">Notes / Condition</label>
-                          <textarea rows="3" value={eventData.notes} onChange={e => setEventData({...eventData, notes: e.target.value})} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3"></textarea>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-end pt-4">
-                        <button type="submit" disabled={logLoading} className="bg-orange-500 hover:bg-orange-600 px-8 py-3 rounded-lg font-medium text-white transition-colors flex items-center justify-center min-w-[200px] shadow-lg shadow-orange-500/20">
-                          {logLoading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Log Event to Blockchain'}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
+        {/* Page Header */}
+        <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-[36px] p-8 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <Navigation className="w-5 h-5 text-emerald-600" />
                 </div>
-              )}
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">Dashboard</span>
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900 capitalize">{roleType} Portal</h1>
+              <p className="text-slate-500 mt-1">Scan products and log supply chain events to the blockchain.</p>
             </div>
-          )}
+            <div className="flex items-center gap-4">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-bold text-slate-900">{user?.user_metadata?.display_name || user?.email}</p>
+                <span className="text-xs font-black uppercase tracking-widest text-slate-400">{role}</span>
+              </div>
+              <button onClick={logout} className="p-3 bg-[#F8FAFC] border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-2xl transition-all duration-300">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
 
-          {activeTab === 'events' && (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-              {myEvents.length === 0 ? (
-                <div className="p-12 text-center text-slate-400">No events logged yet.</div>
-              ) : (
-                <table className="w-full text-left text-sm text-slate-300">
-                  <thead className="bg-slate-900/50 text-slate-400 font-semibold uppercase text-xs">
+        {/* Tabs */}
+        <div className="flex gap-3">
+          {[
+            { id: 'scan', icon: ScanLine, label: 'Scan Product' },
+            { id: 'events', icon: ListOrdered, label: 'My Events' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-300 ${
+                activeTab === tab.id
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Scan Tab */}
+        {activeTab === 'scan' && (
+          <div className="space-y-6">
+
+            {/* Search Card */}
+            <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <h2 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+                <ScanLine className="w-5 h-5 text-emerald-500" /> Lookup Product
+              </h2>
+              <p className="text-slate-500 text-sm mb-5">Enter a Trace ID to look up a product and log a new event.</p>
+              <form onSubmit={handleSearch} className="flex gap-3">
+                <div className="relative flex-1">
+                  <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <input 
+                    type="text" 
+                    placeholder="Enter Trace ID (e.g. TC-2026-FOOD-001)" 
+                    value={traceId}
+                    onChange={e => setTraceId(e.target.value)}
+                    className="w-full bg-[#F8FAFC] border border-slate-200 rounded-2xl py-3.5 pl-12 pr-4 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all font-mono uppercase"
+                  />
+                </div>
+                <button type="submit" disabled={searchLoading} className="bg-slate-900 hover:bg-slate-800 text-white px-8 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center min-w-[120px]">
+                  {searchLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Search'}
+                </button>
+              </form>
+            </div>
+
+            {product && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Product Info & Alert Col */}
+                <div className="md:col-span-1 space-y-4">
+                  <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                        <Package className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900">{product.name}</h3>
+                        <p className="font-mono text-xs text-emerald-600">{product.id}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between border-b border-slate-100 pb-3">
+                        <span className="text-slate-400 font-medium">Origin</span>
+                        <span className="font-semibold text-slate-900 text-right">{product.origin}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-100 pb-3">
+                        <span className="text-slate-400 font-medium">Current Stage</span>
+                        <span className="font-semibold text-slate-900 capitalize text-right">{product.current_stage}</span>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-100 pb-3">
+                        <span className="text-slate-400 font-medium">Trust Score</span>
+                        <span className={`font-bold text-right ${product.trust_score > 80 ? 'text-emerald-600' : product.trust_score > 50 ? 'text-orange-500' : 'text-red-500'}`}>
+                          {product.trust_score}/100
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400 font-medium">Expiry</span>
+                        <span className="font-semibold text-slate-900 text-right">{new Date(product.exp_date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {alerts.length > 0 && (
+                    <div className="bg-red-50 border border-red-200 p-5 rounded-3xl">
+                      <h4 className="flex items-center gap-2 font-bold text-red-700 mb-3 text-sm uppercase tracking-widest">
+                        <Info className="w-4 h-4" /> AI Alerts
+                      </h4>
+                      <ul className="space-y-2">
+                        {alerts.map(a => (
+                          <li key={a.id} className="text-sm text-red-600 flex items-start gap-2">
+                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 shrink-0"></span>
+                            {a.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
+                {/* Log Event Form */}
+                <div className="md:col-span-2 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-8 shadow-sm">
+                  <div className="mb-6 pb-6 border-b border-slate-100">
+                    <h2 className="text-xl font-bold text-slate-900 mb-1">Log New Event</h2>
+                    <p className="text-sm text-slate-500">
+                      Appending cryptographically secure block for{' '}
+                      <span className="font-bold text-emerald-600 uppercase">{myStage}</span> stage.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleLogEvent} className="space-y-5">
+                    <div className="grid grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Actor Name</label>
+                        <input disabled value={user?.user_metadata?.display_name || user?.email} className="w-full bg-[#F8FAFC] border border-slate-200 rounded-2xl px-4 py-3 text-slate-400 cursor-not-allowed font-medium" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Location *</label>
+                        <div className="flex">
+                          <input required value={eventData.location} onChange={e => setEventData({...eventData, location: e.target.value})} className="flex-1 bg-white border border-slate-200 rounded-l-2xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all" placeholder="City, Facility" />
+                          <button type="button" onClick={getLocation} className="bg-slate-900 hover:bg-slate-800 px-4 rounded-r-2xl transition-all flex items-center justify-center">
+                            {locationLoading ? <Loader2 className="w-4 h-4 animate-spin text-white" /> : <MapPin className="w-4 h-4 text-white" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Temperature (°C) <span className="text-slate-300 normal-case font-normal">(Optional)</span></label>
+                        <input type="number" step="0.1" value={eventData.temperature} onChange={e => setEventData({...eventData, temperature: e.target.value})} className={inputClass} placeholder="e.g. 4.5" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Humidity (%) <span className="text-slate-300 normal-case font-normal">(Optional)</span></label>
+                        <input type="number" step="0.1" value={eventData.humidity} onChange={e => setEventData({...eventData, humidity: e.target.value})} className={inputClass} placeholder="e.g. 65" />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="block text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Notes / Condition</label>
+                        <textarea rows="3" value={eventData.notes} onChange={e => setEventData({...eventData, notes: e.target.value})} className={inputClass} placeholder="Observations, condition checks..."></textarea>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end pt-2">
+                      <button type="submit" disabled={logLoading} className="bg-slate-900 hover:bg-slate-800 px-8 py-3.5 rounded-2xl font-semibold text-white transition-all duration-300 flex items-center justify-center min-w-[200px] shadow-sm">
+                        {logLoading ? <Loader2 className="animate-spin w-5 h-5" /> : 'Log Event to Blockchain'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Events Tab */}
+        {activeTab === 'events' && (
+          <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+            {myEvents.length === 0 ? (
+              <div className="p-16 text-center">
+                <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ListOrdered className="w-10 h-10 text-slate-300" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">No events logged yet</h3>
+                <p className="text-slate-500">Scan a product and log your first event.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 border-b border-slate-100">
                     <tr>
-                      <th className="px-6 py-4">Product</th>
-                      <th className="px-6 py-4">Stage Logged</th>
-                      <th className="px-6 py-4">Location</th>
-                      <th className="px-6 py-4">Timestamp</th>
-                      <th className="px-6 py-4">Block Hash</th>
+                      {['Product', 'Stage Logged', 'Location', 'Timestamp', 'Block Hash'].map(h => (
+                        <th key={h} className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">{h}</th>
+                      ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-700/50">
+                  <tbody className="divide-y divide-slate-50">
                     {myEvents.map(ev => (
-                      <tr key={ev.id} className="hover:bg-slate-700/30 transition-colors">
-                        <td className="px-6 py-4 font-medium text-white">{ev.product?.name || ev.product_id}</td>
-                        <td className="px-6 py-4 capitalize"><span className="bg-slate-700 text-slate-200 px-2 py-1 rounded text-xs">{ev.stage}</span></td>
-                        <td className="px-6 py-4">{ev.location}</td>
+                      <tr key={ev.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 font-semibold text-slate-900">{ev.product?.name || ev.product_id}</td>
+                        <td className="px-6 py-4">
+                          <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">{ev.stage}</span>
+                        </td>
+                        <td className="px-6 py-4 text-slate-500">{ev.location}</td>
                         <td className="px-6 py-4 text-slate-400">{new Date(ev.created_at).toLocaleString()}</td>
-                        <td className="px-6 py-4 font-mono text-xs text-orange-400/80 max-w-[150px] truncate" title={ev.event_hash}>{ev.event_hash}</td>
+                        <td className="px-6 py-4 font-mono text-xs text-emerald-600 bg-emerald-50 max-w-[150px] truncate" title={ev.event_hash}>{ev.event_hash}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              )}
-            </div>
-          )}
-        </main>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

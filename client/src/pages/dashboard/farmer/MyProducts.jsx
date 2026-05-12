@@ -14,6 +14,9 @@ const MyProducts = () => {
 
   const fetchProducts = async () => {
     try {
+      // Auto-assign any orphaned products to the current user (fixes the previous bug)
+      await supabase.from('products').update({ registered_by: user.id }).is('registered_by', null);
+
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -41,16 +44,30 @@ const MyProducts = () => {
     return <span className={`px-2 py-1 rounded border border-slate-100 text-[10px] font-bold uppercase ${map[status] || map.active}`}>{status}</span>;
   };
 
-  const getExpiryInfo = (expDate) => {
+  const getExpiryInfo = (prod) => {
+    const expDate = prod?.exp_date;
     if (!expDate) return { label: 'No expiry', color: 'slate' };
+    const [year, month, day] = expDate.split('T')[0].split('-');
+    const expiry = new Date(year, month - 1, day);
     const today = new Date();
-    const expiry = new Date(expDate);
-    const diffMs = expiry - today;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    today.setHours(0, 0, 0, 0);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return { label: `Expired`, color: 'red' };
-    if (diffDays <= 7) return { label: `Expiring soon`, color: 'orange' };
-    return { label: `Valid`, color: 'green' };
+    const keywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese', 'medicine', 'vaccine'];
+    const nameDesc = `${prod.name || ''} ${prod.description || ''}`.toLowerCase();
+    const isSensitive = keywords.some(kw => nameDesc.includes(kw));
+
+    if (isSensitive) {
+      if (diffDays < 0) return { label: `Expired ${Math.abs(diffDays)} days ago`, color: 'red' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'red' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    } else {
+      if (diffDays < 0) return { label: `Expired`, color: 'gray' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'orange' };
+      if (diffDays <= 30) return { label: `Expires in ${diffDays} days`, color: 'slate' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    }
   };
 
   const downloadQR = (id) => {
@@ -74,14 +91,14 @@ const MyProducts = () => {
           <h2 className="text-2xl font-bold text-gray-900 font-poppins">My Products</h2>
           <p className="text-gray-500 text-sm mt-1">Manage and track your registered batches.</p>
         </div>
-        <Link to="/dashboard/farmer/register" className="bg-orange-500 hover:bg-orange-600 transition-all px-5 py-2.5 rounded-xl font-bold text-white flex items-center gap-2 shadow-lg shadow-orange-500/10 active:scale-95">
+        <Link to="/dashboard/farmer/register" className="bg-slate-900 hover:bg-slate-800 transition-all px-5 py-2.5 rounded-2xl font-semibold text-white flex items-center gap-2 shadow-sm">
           <Plus className="w-5 h-5" /> Register New
         </Link>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-500"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center shadow-sm">
@@ -90,28 +107,28 @@ const MyProducts = () => {
           </div>
           <h3 className="text-xl font-bold text-gray-900 mb-2">No products registered yet</h3>
           <p className="text-gray-500 mb-6 max-w-md mx-auto">Start tracing your products by registering your first batch onto the blockchain.</p>
-          <Link to="/dashboard/farmer/register" className="inline-flex bg-orange-500 hover:bg-orange-600 transition-all px-6 py-3 rounded-xl font-bold text-white items-center gap-2 shadow-md">
+          <Link to="/dashboard/farmer/register" className="inline-flex bg-slate-900 hover:bg-slate-800 transition-all px-6 py-3 rounded-2xl font-semibold text-white items-center gap-2 shadow-sm">
             <Plus className="w-5 h-5" /> Register First Product
           </Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {products.map(product => {
-            const expInfo = getExpiryInfo(product.exp_date);
+            const expInfo = getExpiryInfo(product);
             return (
               <div key={product.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                 {/* Top: Name & Status */}
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
-                    <p className="text-xs font-mono text-orange-500 mt-1 font-bold">{product.id}</p>
+                    <p className="text-xs font-mono text-emerald-600 mt-1 font-bold">{product.id}</p>
                   </div>
                   {getStatusBadge(product.status)}
                 </div>
 
                 {/* Middle: Category & Trust Score */}
                 <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-50">
-                  <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-orange-100">
+                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-200">
                     <Package className="w-3.5 h-3.5" /> {product.category}
                   </span>
                   
@@ -151,7 +168,7 @@ const MyProducts = () => {
 
                 {/* Bottom Row: Actions */}
                 <div className="flex gap-3 mt-auto">
-                  <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-orange-500 hover:bg-orange-600 transition-all text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95">
+                  <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-slate-900 hover:bg-slate-800 transition-all text-white py-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                     <Activity className="w-4 h-4" /> View Journey
                   </button>
                   <button onClick={() => downloadQR(product.id)} className="bg-white border border-slate-200 hover:bg-gray-50 transition-colors text-gray-600 px-4 py-2.5 rounded-xl flex items-center justify-center shadow-sm">

@@ -36,27 +36,48 @@ export const analyzeChain = (events, product) => {
   }
 
   // Check temperature and expiry based on AI rules
-  const tempBreach = events.some(e => Number(e.temperature) > 30 || Number(e.temperature) < 2);
-  if (tempBreach && product.category?.toLowerCase() === 'food') {
-    trustDeductions += 15;
-    insights.push({ severity: 'high', message: `⚠ Temperature issue detected at one or more stages` });
-    recommendations.push("Store below 5°C");
+  const isFood = product.category?.toLowerCase() === 'food';
+  const keywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese'];
+  const nameDesc = `${product.name || ''} ${product.description || ''}`.toLowerCase();
+  const isTempSensitive = keywords.some(kw => nameDesc.includes(kw));
+
+  if (isFood && isTempSensitive) {
+    const tempBreach = events.some(e => {
+      if (e.temperature === null || e.temperature === undefined || e.temperature === '') return false;
+      const temp = Number(e.temperature);
+      return temp > 8 || temp < 0;
+    });
+    if (tempBreach) {
+      trustDeductions += 15;
+      insights.push({ severity: 'high', message: `⚠ Temperature issue detected at one or more stages` });
+      recommendations.push("Store between 0°C and 8°C");
+    }
   }
 
   if (product.exp_date && product.status === 'active') {
-    const expDate = new Date(product.exp_date);
-    const threeDaysFromNow = new Date();
-    threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+    const [year, month, day] = product.exp_date.split('T')[0].split('-');
+    const expDate = new Date(year, month - 1, day);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffTime = expDate.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-    if (expDate <= threeDaysFromNow) {
-      const diffDays = Math.ceil((expDate - new Date()) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 3) {
       trustDeductions += 20;
       
+      const expiryKeywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese', 'medicine', 'vaccine'];
+      const nameDesc = `${product.name || ''} ${product.description || ''}`.toLowerCase();
+      const isSensitiveExpiry = expiryKeywords.some(kw => nameDesc.includes(kw));
+
       if (diffDays < 0) {
         insights.push({ severity: 'high', message: `⚠ Expired ${Math.abs(diffDays)} days ago` });
-        recommendations.push(`Do not consume. Product is expired.`);
+        if (isSensitiveExpiry) {
+          recommendations.push(`Do not consume. Product is expired.`);
+        } else {
+          recommendations.push(`Product has passed its registered expiry date. Please verify with the seller.`);
+        }
       } else {
-        insights.push({ severity: 'high', message: `⚠ Expiring in ${diffDays} days` });
+        insights.push({ severity: 'high', message: `⚠ Expiring soon` });
         recommendations.push(`Consume within ${diffDays} days`);
       }
     }

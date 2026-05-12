@@ -48,7 +48,7 @@ const AllEvents = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-poppins">
-            <ClipboardList className="text-orange-500 w-6 h-6" /> Network Events Ledger
+            <ClipboardList className="text-emerald-500 w-6 h-6" /> Network Events Ledger
           </h2>
           <p className="text-gray-500 text-sm mt-1 font-medium">Immutable record of all supply chain events across the network.</p>
         </div>
@@ -63,7 +63,7 @@ const AllEvents = () => {
             placeholder="Search by product name, Trace ID, or Hash..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-gray-50 border border-slate-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/5 rounded-xl py-3 pl-11 pr-4 outline-none text-gray-900 transition-all placeholder-gray-300 font-mono text-xs"
+            className="w-full bg-[#F8FAFC] border border-slate-200 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/20 rounded-2xl py-3 pl-11 pr-4 outline-none text-slate-900 transition-all placeholder:text-slate-300 font-mono text-xs"
           />
         </div>
         
@@ -83,7 +83,7 @@ const AllEvents = () => {
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="p-16 text-center text-gray-400">
@@ -111,9 +111,9 @@ const AllEvents = () => {
                     <td className="px-6 py-4">
                       <Link 
                         to={`/dashboard/product/${e.product_id}`} 
-                        className="font-black text-gray-900 hover:text-orange-500 transition-colors flex items-center gap-1.5 text-sm"
+                        className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors flex items-center gap-1.5 text-sm"
                       >
-                        {e.product?.name || 'Unknown'} <LinkIcon className="w-3 h-3 text-gray-300 group-hover:text-orange-300" />
+                        {e.product?.name || 'Unknown'} <LinkIcon className="w-3 h-3 text-slate-300 group-hover:text-emerald-400" />
                       </Link>
                       <div className="text-[10px] text-gray-400 font-mono font-bold mt-1 tracking-tighter uppercase">{e.product_id.substring(0, 16)}...</div>
                     </td>
@@ -124,7 +124,7 @@ const AllEvents = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="font-black text-gray-900 text-sm">{e.actor}</div>
-                      <div className="text-[10px] text-orange-600 uppercase font-black tracking-widest mt-1">{e.role}</div>
+                      <div className="text-[10px] text-emerald-600 uppercase font-black tracking-widest mt-1">{e.role}</div>
                     </td>
                     <td className="px-6 py-4 truncate max-w-[150px] text-gray-500 font-medium text-xs" title={e.location}>
                       {e.location}

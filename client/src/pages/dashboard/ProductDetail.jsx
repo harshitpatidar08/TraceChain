@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { MapPin, ShieldCheck, AlertCircle, CalendarDays, Loader2, Copy, ScanLine } from 'lucide-react';
+import { MapPin, ShieldCheck, AlertCircle, CalendarDays, Loader2, Copy, ScanLine, Package, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../../config/supabase';
 import { useAuth } from '../../context/AuthContext';
@@ -66,10 +66,12 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-32 text-gray-400">
-        <Loader2 className="w-12 h-12 text-orange-500 animate-spin mb-4" />
-        <h2 className="text-xl font-bold text-gray-900 font-poppins">Loading Blockchain Ledger...</h2>
-        <p className="text-sm text-gray-500 mt-2 font-mono bg-gray-100 px-3 py-1 rounded-full border border-slate-200">Verifying block integrity for {traceId}</p>
+      <div className="flex flex-col items-center justify-center py-32">
+        <div className="w-16 h-16 rounded-[20px] bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-6">
+          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-900 mb-2">Loading Blockchain Ledger...</h2>
+        <p className="text-sm text-slate-400 font-mono bg-[#F8FAFC] px-4 py-2 rounded-full border border-slate-200">Verifying block integrity for {traceId}</p>
       </div>
     );
   }
@@ -77,13 +79,13 @@ const ProductDetail = () => {
   if (error || !data) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="bg-white p-10 rounded-3xl max-w-md w-full text-center shadow-2xl border border-slate-200">
-          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-12 h-12 text-red-500" />
+        <div className="bg-white/90 backdrop-blur-sm p-10 rounded-[36px] max-w-md w-full text-center shadow-sm border border-slate-200">
+          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-100">
+            <AlertCircle className="w-10 h-10 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2 font-poppins">Product Not Found</h2>
-          <p className="text-gray-500 font-mono text-xs mb-8 bg-gray-50 py-2 rounded-lg border border-slate-100">{traceId}</p>
-          <button onClick={() => navigate('/dashboard/search')} className="bg-orange-500 hover:bg-orange-600 text-white w-full py-4 rounded-xl font-bold transition-all shadow-lg shadow-orange-500/10 active:scale-95">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Product Not Found</h2>
+          <p className="text-slate-400 font-mono text-xs mb-8 bg-[#F8FAFC] py-2 px-4 rounded-xl border border-slate-100">{traceId}</p>
+          <button onClick={() => navigate('/dashboard/search')} className="bg-slate-900 hover:bg-slate-800 text-white w-full py-4 rounded-2xl font-semibold transition-all shadow-sm">
             Back to Search
           </button>
         </div>
@@ -95,76 +97,101 @@ const ProductDetail = () => {
   const { score, gapAnalysis } = computed;
 
   // Render product identity card status mapping
-  let statusBadge = "bg-green-100 text-green-700 border-green-200";
+  let statusBadge = "bg-emerald-100 text-emerald-700 border-emerald-200";
   if (product.status === 'recalled') statusBadge = "bg-red-100 text-red-700 border-red-200";
-  if (product.status === 'expired') statusBadge = "bg-amber-100 text-amber-700 border-amber-200";
+  if (product.status === 'expired') statusBadge = "bg-orange-100 text-orange-700 border-orange-200";
 
-  const getExpiryInfo = (expDate) => {
+  const getExpiryInfo = (prod) => {
+    const expDate = prod?.exp_date;
     if (!expDate) return { label: 'No expiry', color: 'gray' };
+    const [year, month, day] = expDate.split('T')[0].split('-');
+    const expiry = new Date(year, month - 1, day);
     const today = new Date();
-    const expiry = new Date(expDate);
-    const diffMs = expiry - today;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    today.setHours(0, 0, 0, 0);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return { label: `Expired ${Math.abs(diffDays)} days ago`, color: 'red' };
-    if (diffDays <= 7) return { label: `Expiring in ${diffDays} days`, color: 'orange' };
-    return { label: `Expires in ${diffDays} days`, color: 'green' };
+    const keywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese', 'medicine', 'vaccine'];
+    const nameDesc = `${prod.name || ''} ${prod.description || ''}`.toLowerCase();
+    const isSensitive = keywords.some(kw => nameDesc.includes(kw));
+
+    if (isSensitive) {
+      if (diffDays < 0) return { label: `Expired ${Math.abs(diffDays)} days ago`, color: 'red' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'red' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    } else {
+      if (diffDays < 0) return { label: `Expired`, color: 'gray' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'orange' };
+      if (diffDays <= 30) return { label: `Expires in ${diffDays} days`, color: 'slate' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    }
   };
 
-  const expiryInfo = getExpiryInfo(product.exp_date);
+  const expiryInfo = getExpiryInfo(product);
+  const expiryColorMap = { green: 'text-emerald-600', red: 'text-red-600', orange: 'text-orange-600', gray: 'text-slate-400', slate: 'text-slate-600' };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-12 relative">
+    <div className="max-w-5xl mx-auto space-y-6 pb-12 relative">
       
       {/* Header Actions */}
-      {canLogEvent && (
-        <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-semibold text-sm transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+        {canLogEvent && (
           <Link 
             to={`/dashboard/scan`} 
-            className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2 shadow-lg shadow-orange-500/10 active:scale-95"
+            className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all flex items-center gap-2 shadow-sm"
           >
             <ScanLine className="w-5 h-5" /> Log New Event
           </Link>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* TOP: Identity Card */}
-      <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-slate-200 flex flex-col md:flex-row gap-8 items-start md:items-center relative overflow-hidden">
-        <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none rotate-12">
-          <Package className="w-48 h-48 text-orange-500" />
+      <div className="bg-white/90 backdrop-blur-sm p-6 md:p-10 rounded-[36px] shadow-sm border border-slate-200 flex flex-col md:flex-row gap-8 items-start md:items-center relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-52 h-52 bg-emerald-100 rounded-full blur-3xl opacity-20 pointer-events-none" />
+        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none rotate-12">
+          <Package className="w-48 h-48 text-slate-900" />
         </div>
         
         <div className="flex-1 space-y-5 w-full relative z-10">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="bg-gray-50 border border-slate-100 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-500">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <span className="bg-[#F8FAFC] border border-slate-200 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-500">
               {product.brand || 'No Brand'}
             </span>
-            <span className="bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-orange-100">
+            <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
               {product.category}
             </span>
-            <span className={`px-3 py-1 rounded-full border text-[10px] font-bold uppercase tracking-widest ${statusBadge}`}>
+            <span className={`px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${statusBadge}`}>
               {product.status}
             </span>
           </div>
           
-          <h1 className="text-3xl md:text-5xl font-black text-gray-900 leading-tight font-poppins">{product.name}</h1>
+          <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight">{product.name}</h1>
           
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-bold text-gray-600 pt-5 border-t border-slate-100">
-            <div className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-orange-500"/> {product.origin}</div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-semibold text-slate-600 pt-5 border-t border-slate-100">
             <div className="flex items-center gap-1.5">
-              <CalendarDays className={`w-4 h-4 text-${expiryInfo.color === 'green' ? 'green' : expiryInfo.color === 'orange' ? 'orange' : 'red'}-500`}/> 
-              <span className={`text-${expiryInfo.color === 'green' ? 'green' : expiryInfo.color === 'orange' ? 'orange' : 'red'}-600`}>{expiryInfo.label}</span>
+              <MapPin className="w-4 h-4 text-emerald-500"/>
+              {product.origin}
             </div>
-            <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-gray-100 transition-all border border-slate-100" onClick={() => {navigator.clipboard.writeText(product.id); toast.success('Trace ID Copied');}}>
-              <span className="font-mono text-orange-600 tracking-wider text-xs font-bold">ID: {product.id}</span>
-              <Copy className="w-3.5 h-3.5 text-gray-400"/>
+            <div className="flex items-center gap-1.5">
+              <CalendarDays className={`w-4 h-4 ${expiryColorMap[expiryInfo.color]}`}/> 
+              <span className={expiryColorMap[expiryInfo.color]}>{expiryInfo.label}</span>
+            </div>
+            <div 
+              className="flex items-center gap-1.5 bg-[#F8FAFC] border border-slate-200 px-3 py-1.5 rounded-xl cursor-pointer hover:bg-slate-100 transition-all" 
+              onClick={() => {navigator.clipboard.writeText(product.id); toast.success('Trace ID Copied');}}
+            >
+              <span className="font-mono text-emerald-600 tracking-wider text-xs font-bold">ID: {product.id}</span>
+              <Copy className="w-3.5 h-3.5 text-slate-400"/>
             </div>
           </div>
 
           {product.certifications?.length > 0 && (
             <div className="flex flex-wrap gap-2 pt-2">
               {product.certifications.map(c => (
-                 <span key={c} className="flex items-center gap-1.5 text-[10px] font-bold bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                 <span key={c} className="flex items-center gap-1.5 text-[10px] font-black bg-emerald-50 border border-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full uppercase tracking-wider">
                    <ShieldCheck className="w-3.5 h-3.5" /> {c}
                  </span>
               ))}
@@ -177,34 +204,34 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
          {/* MIDDLE: AI Insights */}
          <AIInsightBox product={product} events={events} gapAnalysis={gapAnalysis} />
          
-         <div className="bg-white p-8 rounded-3xl border border-slate-200 flex flex-col justify-center shadow-xl">
-           <h3 className="text-gray-400 font-bold text-[10px] uppercase mb-6 tracking-widest flex items-center gap-2">
+         <div className="bg-white/90 backdrop-blur-sm p-8 rounded-[36px] border border-slate-200 flex flex-col justify-center shadow-sm">
+           <h3 className="text-slate-400 font-black text-[10px] uppercase mb-6 tracking-[0.2em] flex items-center gap-2">
              <ShieldCheck className="w-4 h-4 text-emerald-500" /> Chain Integrity
            </h3>
            <div className="space-y-4">
              <div className="flex justify-between items-center border-b border-slate-50 pb-4">
-               <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Event Count</span>
-               <span className="font-black text-gray-900 text-xl bg-gray-50 px-4 py-1 rounded-xl border border-slate-100">{events.length}</span>
+               <span className="text-slate-500 font-semibold text-sm">Event Count</span>
+               <span className="font-black text-slate-900 text-xl bg-[#F8FAFC] px-4 py-1 rounded-xl border border-slate-100">{events.length}</span>
              </div>
              {events.length > 0 && (
                <>
                  <div className="flex justify-between items-center border-b border-slate-50 pb-4">
-                   <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Ledger Genesis</span>
-                   <span className="font-mono text-sm text-gray-700 font-bold tracking-tight">{new Date(events[0].created_at).toLocaleDateString()}</span>
+                   <span className="text-slate-500 font-semibold text-sm">Ledger Genesis</span>
+                   <span className="font-mono text-sm text-slate-700 font-bold bg-[#F8FAFC] px-3 py-1 rounded-xl border border-slate-100">{new Date(events[0].created_at).toLocaleDateString()}</span>
                  </div>
                  <div className="flex justify-between items-center border-b border-slate-50 pb-4">
-                   <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Last Event</span>
-                   <span className="font-mono text-sm text-gray-700 font-bold tracking-tight">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
+                   <span className="text-slate-500 font-semibold text-sm">Last Event</span>
+                   <span className="font-mono text-sm text-slate-700 font-bold bg-[#F8FAFC] px-3 py-1 rounded-xl border border-slate-100">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
                  </div>
                </>
              )}
              <div className="flex justify-between items-center pt-2">
-               <span className="text-gray-500 font-bold text-sm uppercase tracking-wider">Verification</span>
-               <span className="px-3 py-1.5 bg-orange-50 rounded-full font-mono text-[10px] text-orange-600 border border-orange-100 uppercase font-black tracking-widest">
+               <span className="text-slate-500 font-semibold text-sm">Verification</span>
+               <span className="px-3 py-1.5 bg-emerald-50 rounded-full font-mono text-[10px] text-emerald-700 border border-emerald-100 uppercase font-black tracking-widest">
                  SHA-256 Hashed
                </span>
              </div>
@@ -213,9 +240,12 @@ const ProductDetail = () => {
       </div>
 
       {/* BOTTOM: Timeline */}
-      <div className="bg-white p-6 md:p-10 rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
-        <h2 className="text-xl font-black mb-8 flex items-center gap-3 text-gray-900 border-b border-slate-100 pb-6 font-poppins uppercase tracking-wider text-base">
-           <MapPin className="text-orange-500 w-6 h-6" /> Supply Chain Journey Map
+      <div className="bg-white/90 backdrop-blur-sm p-6 md:p-10 rounded-[36px] shadow-sm border border-slate-200 overflow-hidden">
+        <h2 className="text-lg font-black mb-8 flex items-center gap-3 text-slate-900 border-b border-slate-100 pb-6 uppercase tracking-wider">
+           <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center">
+             <MapPin className="text-emerald-600 w-5 h-5" />
+           </div>
+           Supply Chain Journey Map
         </h2>
         <SupplyChainTimeline events={events} currentStage={product.current_stage} gapAnalysis={gapAnalysis} />
       </div>

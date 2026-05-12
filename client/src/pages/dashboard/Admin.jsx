@@ -120,99 +120,120 @@ const Admin = () => {
     }
   };
 
+  const navTabs = [
+    { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
+    { id: 'products', icon: Package, label: 'Products' },
+    { id: 'alerts', icon: AlertTriangle, label: 'Alerts' },
+    { id: 'analytics', icon: BarChart3, label: 'Analytics' }
+  ];
+
+  const statCards = [
+    { label: 'Total Products', value: stats.productsCount, icon: Package, color: 'emerald', bg: 'bg-emerald-100', text: 'text-emerald-600' },
+    { label: 'Events Today', value: stats.eventsToday, icon: BarChart3, color: 'blue', bg: 'bg-blue-100', text: 'text-blue-600' },
+    { label: 'Active Alerts', value: stats.activeAlerts, icon: AlertTriangle, color: 'red', bg: 'bg-red-100', text: 'text-red-600' },
+    { label: 'Avg Trust Score', value: `${stats.avgTrust}/100`, icon: LayoutDashboard, color: 'orange', bg: 'bg-orange-100', text: 'text-orange-600' }
+  ];
+
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      {/* Sidebar */}
-      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
-        <div className="p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-orange-500"><ShieldCheckIcon /> TraceChain</h2>
+    <div className="min-h-screen bg-[#F8FAFC]">
+
+      {/* Background Glows */}
+      <div className="fixed top-0 right-0 w-80 h-80 bg-emerald-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
+      <div className="fixed bottom-0 left-0 w-80 h-80 bg-orange-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        {/* Admin Header */}
+        <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-[36px] p-8 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-52 h-52 bg-red-100 rounded-full blur-3xl opacity-20" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center">
+                  <ShieldCheckIcon className="w-5 h-5 text-red-600" />
+                </div>
+                <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-black uppercase tracking-widest">System Admin</span>
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">Admin Dashboard</h1>
+              <p className="text-slate-500 mt-1">Manage products, resolve alerts, and monitor analytics.</p>
+            </div>
+            <button onClick={logout} className="self-start sm:self-center p-3 bg-[#F8FAFC] border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-2xl transition-all duration-300">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          {[
-            { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
-            { id: 'products', icon: Package, label: 'Products' },
-            { id: 'alerts', icon: AlertTriangle, label: 'Alerts' },
-            { id: 'analytics', icon: BarChart3, label: 'Analytics' }
-          ].map(tab => (
+
+        {/* Navigation Tabs */}
+        <div className="flex flex-wrap gap-3">
+          {navTabs.map(tab => (
             <button 
               key={tab.id}
               onClick={() => setActiveTab(tab.id)} 
-              className={`w-full text-left px-4 py-3 rounded-lg font-medium flex items-center gap-3 transition-colors ${activeTab === tab.id ? 'bg-orange-500/10 text-orange-500' : 'text-slate-300 hover:bg-slate-700/50'}`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-semibold text-sm transition-all duration-300 ${
+                activeTab === tab.id
+                  ? 'bg-slate-900 text-white shadow-sm'
+                  : 'bg-white border border-slate-200 text-slate-500 hover:bg-slate-50'
+              }`}
             >
-              <tab.icon className="w-5 h-5" /> {tab.label}
+              <tab.icon className="w-4 h-4" /> {tab.label}
             </button>
           ))}
-        </nav>
-      </div>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="h-20 border-b border-slate-700 px-8 flex items-center justify-between bg-slate-800/50">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold">Admin Dashboard</h1>
-            <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-mono uppercase">System Admin</span>
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            {statCards.map((card, idx) => (
+              <div key={idx} className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+                <div className={`absolute top-0 right-0 w-28 h-28 ${card.bg} rounded-full blur-2xl opacity-30`} />
+                <div className="relative z-10">
+                  <div className={`w-12 h-12 rounded-2xl ${card.bg} flex items-center justify-center mb-4`}>
+                    <card.icon className={`w-6 h-6 ${card.text}`} />
+                  </div>
+                  <p className="text-sm font-semibold text-slate-500 mb-1">{card.label}</p>
+                  <p className="text-3xl font-black text-slate-900">{card.value}</p>
+                </div>
+              </div>
+            ))}
           </div>
-          <button onClick={logout} className="p-2 text-slate-400 hover:text-red-400 transition-colors">
-             <LogOut className="w-5 h-5" />
-          </button>
-        </header>
+        )}
 
-        {/* Content */}
-        <main className="p-8 flex-1 overflow-auto">
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-4 gap-6">
-              <div className="bg-slate-800 border border-emerald-500/30 p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><Package className="w-16 h-16 text-emerald-500" /></div>
-                <h3 className="text-emerald-400 font-medium mb-2 relative">Total Products</h3>
-                <p className="text-4xl font-bold text-white relative">{stats.productsCount}</p>
+        {/* Alerts Tab */}
+        {activeTab === 'alerts' && (
+          <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+            <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
               </div>
-              <div className="bg-slate-800 border border-blue-500/30 p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><BarChart3 className="w-16 h-16 text-blue-500" /></div>
-                <h3 className="text-blue-400 font-medium mb-2 relative">Events Today</h3>
-                <p className="text-4xl font-bold text-white relative">{stats.eventsToday}</p>
-              </div>
-              <div className="bg-slate-800 border border-red-500/30 p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><AlertTriangle className="w-16 h-16 text-red-500" /></div>
-                <h3 className="text-red-400 font-medium mb-2 relative">Active Alerts</h3>
-                <p className="text-4xl font-bold text-white relative">{stats.activeAlerts}</p>
-              </div>
-              <div className="bg-slate-800 border border-orange-500/30 p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10"><LayoutDashboard className="w-16 h-16 text-orange-500" /></div>
-                <h3 className="text-orange-400 font-medium mb-2 relative">Avg Trust Score</h3>
-                <p className="text-4xl font-bold text-white relative">{stats.avgTrust}/100</p>
+              <div>
+                <h2 className="font-bold text-slate-900">Unresolved Incident Alerts</h2>
+                <p className="text-slate-500 text-sm">{alerts.length} active alerts require attention</p>
               </div>
             </div>
-          )}
-
-          {activeTab === 'alerts' && (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-              <div className="p-6 border-b border-slate-700 font-bold text-lg flex items-center justify-between">
-                <span>Unresolved Incident Alerts</span>
-              </div>
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-900/50 text-slate-400 uppercase font-semibold text-xs">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                    <th className="px-6 py-4">Product</th>
-                    <th className="px-6 py-4">Issue Type</th>
-                    <th className="px-6 py-4">Severity</th>
-                    <th className="px-6 py-4">Details</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                    {['Product', 'Issue Type', 'Severity', 'Details', 'Actions'].map((h, i) => (
+                      <th key={h} className={`px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400 ${i === 4 ? 'text-right' : ''}`}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/50">
+                <tbody className="divide-y divide-slate-50">
                   {alerts.map(a => (
-                    <tr key={a.id} className="hover:bg-slate-700/30 transition-colors">
-                      <td className="px-6 py-4 font-medium text-white">{a.product?.name}</td>
-                      <td className="px-6 py-4"><span className="px-2 py-1 bg-slate-700 rounded text-xs uppercase">{a.alert_type}</span></td>
+                    <tr key={a.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-semibold text-slate-900">{a.product?.name}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold uppercase ${a.severity==='high'?'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-bold uppercase tracking-wider">{a.alert_type}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${a.severity==='high' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                           {a.severity}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-slate-400">{a.message}</td>
+                      <td className="px-6 py-4 text-slate-500 max-w-[200px] truncate">{a.message}</td>
                       <td className="px-6 py-4 text-right">
-                        <button onClick={() => handleResolveAlert(a.id)} className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-colors flex items-center gap-1 inline-flex">
+                        <button onClick={() => handleResolveAlert(a.id)} className="bg-emerald-100 hover:bg-emerald-600 text-emerald-700 hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-1.5 ml-auto">
                           <CheckCircle className="w-3.5 h-3.5" /> Resolve
                         </button>
                       </td>
@@ -221,45 +242,64 @@ const Admin = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'products' && (
-            <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-              <div className="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/30">
-                <div className="relative w-64">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input type="text" placeholder="Search products..." className="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 pl-9 pr-4 text-sm focus:border-orange-500 outline-none" />
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <h2 className="font-bold text-slate-900">All Products</h2>
+                  <p className="text-slate-500 text-sm">{products.length} products in network</p>
                 </div>
               </div>
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-900/50 text-slate-400 uppercase font-semibold text-xs">
+              <div className="relative w-64">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input type="text" placeholder="Search products..." className="w-full bg-[#F8FAFC] border border-slate-200 rounded-2xl py-2.5 pl-9 pr-4 text-sm focus:border-emerald-400 focus:ring-2 focus:ring-emerald-400/30 outline-none transition-all" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                    <th className="px-6 py-4">Product Name</th>
-                    <th className="px-6 py-4">Stage</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Trust Score</th>
-                    <th className="px-6 py-4 text-right">Admin Actions</th>
+                    {['Product Name', 'Stage', 'Status', 'Trust Score', 'Admin Actions'].map((h, i) => (
+                      <th key={h} className={`px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400 ${i === 4 ? 'text-right' : ''}`}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/50">
+                <tbody className="divide-y divide-slate-50">
                   {products.map(p => (
-                    <tr key={p.id} className="hover:bg-slate-700/30 transition-colors">
+                    <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="font-medium text-white">{p.name}</div>
-                        <div className="text-xs font-mono text-orange-400/80">{p.id}</div>
+                        <div className="font-semibold text-slate-900">{p.name}</div>
+                        <div className="text-xs font-mono text-emerald-600">{p.id}</div>
                       </td>
-                      <td className="px-6 py-4 capitalize">{p.current_stage}</td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium uppercase ${p.status==='active'?'bg-green-500/20 text-green-400':'bg-red-500/20 text-red-400'}`}>
+                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold capitalize">{p.current_stage}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${p.status==='active' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
                           {p.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-mono text-white">{p.trust_score}/100</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="font-bold text-slate-900">{p.trust_score}</span>
+                          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden w-16">
+                            <div className={`h-full ${p.trust_score > 80 ? 'bg-emerald-500' : p.trust_score > 50 ? 'bg-orange-400' : 'bg-red-500'}`} style={{ width: `${p.trust_score}%` }}></div>
+                          </div>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-right space-x-2">
                         {p.status === 'active' && (
                           <>
-                            <button onClick={()=>handleStatusChange(p.id, 'recalled')} className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-medium border border-red-500/20 transition-colors">Recall</button>
-                            <button onClick={()=>handleStatusChange(p.id, 'expired')} className="bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-1.5 rounded-md text-xs font-medium transition-colors">Expire</button>
+                            <button onClick={() => handleStatusChange(p.id, 'recalled')} className="bg-red-50 hover:bg-red-500 text-red-600 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold border border-red-200 hover:border-red-500 transition-all duration-300">Recall</button>
+                            <button onClick={() => handleStatusChange(p.id, 'expired')} className="bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-300">Expire</button>
                           </>
                         )}
                       </td>
@@ -268,41 +308,42 @@ const Admin = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
+        )}
 
-          {activeTab === 'analytics' && (
-            <div className="grid grid-cols-2 gap-8">
-              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <h3 className="text-lg font-bold mb-6">Events by Stage</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analytics.stageData}>
-                      <XAxis dataKey="name" stroke="#64748b" tick={{fill: '#94a3b8'}} />
-                      <YAxis stroke="#64748b" tick={{fill: '#94a3b8'}} />
-                      <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} />
-                      <Bar dataKey="count" fill="#f97316" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div className="bg-slate-800 p-6 rounded-2xl border border-slate-700">
-                <h3 className="text-lg font-bold mb-6">Product Categories Split</h3>
-                <div className="h-64 flex justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={analytics.pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
-                        {analytics.pieData.map((entry, index) => (
-                           <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{backgroundColor: '#1e293b', border: 'none', borderRadius: '8px'}} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-6">Events by Stage</h3>
+              <div className="h-64">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={analytics.stageData}>
+                    <XAxis dataKey="name" stroke="#94a3b8" tick={{fill: '#94a3b8', fontSize: 12}} />
+                    <YAxis stroke="#94a3b8" tick={{fill: '#94a3b8', fontSize: 12}} />
+                    <Tooltip contentStyle={{backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 24px rgba(15,23,42,0.08)'}} />
+                    <Bar dataKey="count" fill="#10b981" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          )}
-        </main>
+            <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-900 mb-6">Product Categories Split</h3>
+              <div className="h-64 flex justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={analytics.pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} fill="#8884d8" label>
+                      {analytics.pieData.map((entry, index) => (
+                         <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', boxShadow: '0 4px 24px rgba(15,23,42,0.08)'}} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

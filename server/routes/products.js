@@ -13,7 +13,7 @@ function generateTraceId(category, existingCount) {
 }
 
 // POST /register
-router.post('/register', async (req, res) => {
+router.post('/register', authMiddleware, async (req, res) => {
   try {
     const { 
       name, brand, category, description, origin, 
@@ -44,7 +44,8 @@ router.post('/register', async (req, res) => {
       name, brand, category, description, origin,
       weight, certifications, mfg_date, exp_date,
       current_stage: 'farm',
-      qr_code_url: qrCodeUrl
+      qr_code_url: qrCodeUrl,
+      registered_by: req.user.id
     };
 
     const { data: product, error: productError } = await supabase

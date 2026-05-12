@@ -76,7 +76,7 @@ const Overview = () => {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent shadow-lg shadow-orange-500/20"></div></div>;
+    return <div className="flex flex-col justify-center items-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent mb-3"></div><p className="text-slate-400 font-medium">Loading overview...</p></div>;
   }
 
   return (
@@ -116,7 +116,7 @@ const Overview = () => {
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
           <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-gray-50/50">
             <h3 className="font-black text-gray-900 flex items-center gap-2 uppercase tracking-wider text-xs font-poppins"><AlertTriangle className="w-4 h-4 text-red-600" /> Recent Alerts</h3>
-            <Link to="/dashboard/admin/alerts" className="text-xs font-bold text-orange-600 hover:text-orange-700 flex items-center gap-1 transition-all uppercase tracking-widest">
+            <Link to="/dashboard/admin/alerts" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all uppercase tracking-widest">
               View All <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -170,7 +170,7 @@ const Overview = () => {
                 <XAxis dataKey="name" stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                 <YAxis stroke="#94a3b8" tick={{ fill: '#64748b', fontSize: 10, fontWeight: 'bold' }} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', color: '#111827', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} cursor={{ fill: '#f8fafc', opacity: 1 }} />
-                <Bar dataKey="count" fill="#f97316" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="count" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -199,7 +199,7 @@ const Overview = () => {
               {recentProducts.map(p => (
                 <tr key={p.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">
-                    <Link to={`/dashboard/product/${p.id}`} className="font-black text-gray-900 hover:text-orange-500 transition-colors block text-sm">{p.name}</Link>
+                    <Link to={`/dashboard/product/${p.id}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors block text-sm">{p.name}</Link>
                     <span className="text-[10px] text-gray-400 font-mono font-bold tracking-tight">{p.id.substring(0, 16)}...</span>
                   </td>
                   <td className="px-6 py-4 capitalize font-bold text-gray-600 text-xs">{p.current_stage}</td>

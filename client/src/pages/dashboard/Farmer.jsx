@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, LogOut, Package, RefreshCw } from 'lucide-react';
+import { Plus, LogOut, Package, RefreshCw, Leaf, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Farmer = () => {
@@ -36,103 +36,130 @@ const Farmer = () => {
   }, []);
 
   const getStatusBadge = (status) => {
-    const map = { active: 'bg-green-500/20 text-green-400', recalled: 'bg-red-500/20 text-red-400', expired: 'bg-yellow-500/20 text-yellow-400' };
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${map[status] || map.active}`}>{status}</span>;
+    const map = { 
+      active: 'bg-emerald-100 text-emerald-700', 
+      recalled: 'bg-red-100 text-red-700', 
+      expired: 'bg-orange-100 text-orange-700' 
+    };
+    return <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${map[status] || map.active}`}>{status}</span>;
   };
 
-  const getExpiryInfo = (expDate) => {
+  const getExpiryInfo = (prod) => {
+    const expDate = prod?.exp_date;
     if (!expDate) return { label: 'No expiry', color: 'gray' };
+    const [year, month, day] = expDate.split('T')[0].split('-');
+    const expiry = new Date(year, month - 1, day);
     const today = new Date();
-    const expiry = new Date(expDate);
-    const diffMs = expiry - today;
-    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    today.setHours(0, 0, 0, 0);
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays < 0) return { 
-      label: `Expired ${Math.abs(diffDays)} days ago`, 
-      color: 'red' 
-    };
-    if (diffDays <= 3) return { 
-      label: `Expiring in ${diffDays} days`, 
-      color: 'orange' 
-    };
-    return { 
-      label: `Expires in ${diffDays} days`, 
-      color: 'green' 
-    };
+    const keywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese', 'medicine', 'vaccine'];
+    const nameDesc = `${prod.name || ''} ${prod.description || ''}`.toLowerCase();
+    const isSensitive = keywords.some(kw => nameDesc.includes(kw));
+
+    if (isSensitive) {
+      if (diffDays < 0) return { label: `Expired ${Math.abs(diffDays)} days ago`, color: 'red' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'red' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    } else {
+      if (diffDays < 0) return { label: `Expired`, color: 'gray' };
+      if (diffDays <= 3) return { label: `Expiring soon`, color: 'orange' };
+      if (diffDays <= 30) return { label: `Expires in ${diffDays} days`, color: 'slate' };
+      return { label: `Expires in ${diffDays} days`, color: 'green' };
+    }
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      {/* Sidebar */}
-      <div className="w-64 bg-slate-800 border-r border-slate-700 flex flex-col">
-        <div className="p-6 border-b border-slate-700">
-          <h2 className="text-xl font-bold flex items-center gap-2 text-orange-500"><Package className="w-6 h-6" /> TraceChain</h2>
+    <div className="min-h-screen bg-[#F8FAFC]">
+
+      {/* Background Glows */}
+      <div className="fixed top-0 right-0 w-80 h-80 bg-emerald-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
+      <div className="fixed bottom-0 left-0 w-80 h-80 bg-orange-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
+
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
+
+        {/* Farmer Header */}
+        <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-[36px] p-8 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-52 h-52 bg-emerald-100 rounded-full blur-3xl opacity-30" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                  <Leaf className="w-5 h-5 text-emerald-600" />
+                </div>
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-black uppercase tracking-widest">Farmer</span>
+              </div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">My Products</h1>
+              <p className="text-slate-500 mt-1">Manage and track all your registered products on the blockchain.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Link 
+                to="/dashboard/farmer/register" 
+                className="bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all duration-300 shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Register New
+              </Link>
+              <button onClick={logout} className="p-3 bg-[#F8FAFC] border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-2xl transition-all duration-300">
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
         </div>
-        <nav className="flex-1 p-4 space-y-2">
-          <Link to="/dashboard/farmer" className="block px-4 py-3 bg-orange-500/10 text-orange-500 rounded-lg font-medium">My Products</Link>
-          <Link to="/register" className="block px-4 py-3 text-slate-300 hover:bg-slate-700/50 rounded-lg font-medium">Register Product</Link>
-        </nav>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="h-20 border-b border-slate-700 px-8 flex items-center justify-between bg-slate-800/50">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-semibold">Farmer Dashboard</h1>
-            <span className="px-3 py-1 bg-slate-700 rounded-full text-xs font-mono text-slate-300 uppercase">{role}</span>
-          </div>
-          <div className="flex items-center gap-6">
-            <span className="text-sm font-medium text-slate-300">{user?.email}</span>
-            <button onClick={logout} className="p-2 text-slate-400 hover:text-red-400 transition-colors">
-              <LogOut className="w-5 h-5" />
-            </button>
-          </div>
-        </header>
-
-        {/* Content */}
-        <main className="p-8 flex-1 overflow-auto">
-          <div className="flex justify-between items-center mb-8">
-            <h2 className="text-2xl font-bold">My Products</h2>
-            <Link to="/register" className="bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded-lg font-medium text-white transition-colors flex items-center gap-2 text-sm">
-              <Plus className="w-4 h-4" /> Register New
-            </Link>
-          </div>
-
-          <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden shadow-xl">
-            {loading ? (
-              <div className="p-12 flex justify-center"><RefreshCw className="w-8 h-8 animate-spin text-orange-500" /></div>
-            ) : products.length === 0 ? (
-              <div className="p-12 text-center text-slate-400">No products registered yet.</div>
-            ) : (
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-900/50 text-slate-400 uppercase font-semibold text-xs">
+        {/* Products Table */}
+        <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          {loading ? (
+            <div className="p-16 flex flex-col items-center justify-center">
+              <RefreshCw className="w-8 h-8 animate-spin text-emerald-500 mb-3" />
+              <p className="text-slate-400 font-medium">Loading your products...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="p-16 text-center">
+              <div className="w-20 h-20 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Package className="w-10 h-10 text-emerald-300" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-2">No products yet</h3>
+              <p className="text-slate-500 mb-6">Register your first product to start tracking it on the blockchain.</p>
+              <Link 
+                to="/dashboard/farmer/register" 
+                className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300"
+              >
+                Register First Product <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
-                    <th className="px-6 py-4">Name</th>
-                    <th className="px-6 py-4">Trace ID</th>
-                    <th className="px-6 py-4">Current Stage</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4">Trust Score</th>
-                    <th className="px-6 py-4">Expiry</th>
+                    {['Name', 'Trace ID', 'Current Stage', 'Status', 'Trust Score', 'Expiry'].map(h => (
+                      <th key={h} className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/50">
+                <tbody className="divide-y divide-slate-50">
                   {products.map(product => (
                     <tr 
                       key={product.id} 
                       onClick={() => navigate(`/trace/${product.id}`)}
-                      className="hover:bg-slate-700/30 cursor-pointer transition-colors"
+                      className="hover:bg-slate-50/50 cursor-pointer transition-colors"
                     >
-                      <td className="px-6 py-4 font-medium text-white">{product.name} <span className="text-slate-500 text-xs ml-2">{product.weight}</span></td>
-                      <td className="px-6 py-4 font-mono text-orange-400">{product.id}</td>
-                      <td className="px-6 py-4 capitalize">{product.current_stage}</td>
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-slate-900">{product.name}</div>
+                        {product.weight && <div className="text-slate-400 text-xs mt-0.5">{product.weight}</div>}
+                      </td>
+                      <td className="px-6 py-4 font-mono text-xs text-emerald-600">{product.id}</td>
+                      <td className="px-6 py-4">
+                        <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold capitalize">{product.current_stage}</span>
+                      </td>
                       <td className="px-6 py-4">{getStatusBadge(product.status)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <span className="font-mono">{product.trust_score}</span>
-                          <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden w-24">
+                          <span className="font-bold text-slate-900">{product.trust_score}</span>
+                          <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden w-16">
                             <div 
-                              className={`h-full ${product.trust_score > 80 ? 'bg-green-500' : product.trust_score > 50 ? 'bg-yellow-500' : 'bg-red-500'}`} 
+                              className={`h-full ${product.trust_score > 80 ? 'bg-emerald-500' : product.trust_score > 50 ? 'bg-orange-400' : 'bg-red-500'}`} 
                               style={{ width: `${product.trust_score}%` }}
                             ></div>
                           </div>
@@ -140,17 +167,18 @@ const Farmer = () => {
                       </td>
                       <td className="px-6 py-4">
                         {(() => {
-                          const info = getExpiryInfo(product.exp_date);
-                          return <span className={`text-${info.color}-400 font-medium`}>{new Date(product.exp_date).toLocaleDateString()}</span>;
+                          const info = getExpiryInfo(product);
+                          const colorMap = { green: 'text-emerald-600', red: 'text-red-600', orange: 'text-orange-600', gray: 'text-slate-400', slate: 'text-slate-500' };
+                          return <span className={`font-medium ${colorMap[info.color] || 'text-slate-500'}`}>{new Date(product.exp_date).toLocaleDateString()}</span>;
                         })()}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            )}
-          </div>
-        </main>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

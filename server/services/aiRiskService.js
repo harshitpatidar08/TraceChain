@@ -32,19 +32,33 @@ export const runRiskDetection = async () => {
 
     // RULE 1 - Expiry Warning:
     if (product.exp_date && product.status === 'active') {
-      const expDate = new Date(product.exp_date);
-      const threeDaysFromNow = new Date();
-      threeDaysFromNow.setDate(threeDaysFromNow.getDate() + 3);
+      const [year, month, day] = product.exp_date.split('T')[0].split('-');
+      const expDate = new Date(year, month - 1, day);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffTime = expDate.getTime() - today.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
-      if (expDate <= threeDaysFromNow) {
+      if (diffDays <= 3) {
         alerts.push({ type: 'expiry', severity: 'high', msg: 'Product expires in less than 3 days.' });
       }
     }
 
     // RULE 2 - Temperature Breach:
-    const tempBreach = events?.some(e => Number(e.temperature) > 30 || Number(e.temperature) < 2);
-    if (tempBreach && product.category?.toLowerCase() === 'food') {
-      alerts.push({ type: 'temperature', severity: 'high', msg: 'Temperature breach detected.' });
+    const isFood = product.category?.toLowerCase() === 'food';
+    const keywords = ['milk', 'dairy', 'meat', 'fish', 'seafood', 'frozen', 'ice cream', 'yogurt', 'cheese'];
+    const nameDesc = `${product.name || ''} ${product.description || ''}`.toLowerCase();
+    const isTempSensitive = keywords.some(kw => nameDesc.includes(kw));
+
+    if (isFood && isTempSensitive) {
+      const tempBreach = events?.some(e => {
+        if (e.temperature === null || e.temperature === undefined || e.temperature === '') return false;
+        const temp = Number(e.temperature);
+        return temp > 8 || temp < 0;
+      });
+      if (tempBreach) {
+        alerts.push({ type: 'temperature', severity: 'high', msg: 'Temperature breach detected.' });
+      }
     }
 
     // RULE 3 - Missing Stage:

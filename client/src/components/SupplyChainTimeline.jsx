@@ -1,113 +1,346 @@
-import React, { useState } from 'react';
-import { Check, ShieldAlert, Clock, MapPin, ChevronDown, ChevronUp } from 'lucide-react';
+import React, {
+  useState
+} from 'react';
+
+import {
+  Check,
+  ShieldAlert,
+  Clock,
+  MapPin,
+  Sparkles
+} from 'lucide-react';
 
 const STAGES = [
-  { id: 'farm', label: 'Farm Origin' },
-  { id: 'processing', label: 'Processing' },
-  { id: 'distribution', label: 'Distribution' },
-  { id: 'retail', label: 'Retail' },
-  { id: 'consumer', label: 'Consumer' }
+  {
+    id: 'farm',
+    label: 'Farm Origin'
+  },
+  {
+    id: 'processing',
+    label: 'Processing'
+  },
+  {
+    id: 'distribution',
+    label: 'Distribution'
+  },
+  {
+    id: 'retail',
+    label: 'Retail'
+  },
+  {
+    id: 'consumer',
+    label: 'Consumer'
+  }
 ];
 
-const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
-  const [expandedStage, setExpandedStage] = useState(null);
-  
-  const actualStages = events.map(e => e.stage);
-  const currentStageIndex = STAGES.findIndex(s => s.id === currentStage);
+const SupplyChainTimeline = ({
+  events,
+  currentStage,
+  gapAnalysis
+}) => {
+  const [expandedStage, setExpandedStage] =
+    useState(null);
+
+  const actualStages =
+    events.map((e) => e.stage);
+
+  const currentStageIndex =
+    STAGES.findIndex(
+      (s) =>
+        s.id === currentStage
+    );
 
   return (
-    <div className="w-full py-8 overflow-x-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center min-w-[700px] relative px-8">
-        
+    <div className="w-full py-10 overflow-x-auto">
+
+      <div className="min-w-[850px] relative px-10">
+
         {/* Background Line */}
-        <div className="absolute top-[32px] left-[60px] right-[60px] h-[3px] bg-slate-100 hidden md:block z-0 rounded-full"></div>
 
-        {STAGES.map((stage, index) => {
-          const event = events.find(e => e.stage === stage.id);
-          const isCompleted = !!event;
-          const isCurrent = stage.id === currentStage;
-          const isPending = !isCompleted && !isCurrent && index > currentStageIndex;
-          const isMissing = gapAnalysis?.missingStages?.includes(stage.id);
-          const isDelayed = gapAnalysis?.delayedStages?.includes(stage.id);
+        <div className="absolute top-[62px] left-[100px] right-[100px] h-[6px] bg-slate-100 rounded-full z-0" />
 
-          // Status colors logic
-          let circleClasses = "w-16 h-16 rounded-full flex items-center justify-center z-10 border-[6px] transition-all duration-300 ";
-          let textClasses = "text-xs font-black mt-5 text-center w-full uppercase tracking-widest ";
+        <div className="flex justify-between items-start relative z-10">
 
-          if (isCompleted) {
-            circleClasses += "bg-green-500 border-green-50 shadow-lg shadow-green-500/20";
-            textClasses += "text-green-600";
-          } else if (isCurrent) {
-            circleClasses += "bg-orange-500 border-orange-50 animate-pulse shadow-xl shadow-orange-500/30 scale-110";
-            textClasses += "text-orange-600";
-          } else if (isMissing) {
-            circleClasses += "bg-white border-red-100 shadow-md";
-            textClasses += "text-red-500";
-          } else {
-            circleClasses += "bg-white border-slate-100";
-            textClasses += "text-gray-300";
-          }
+          {STAGES.map(
+            (stage, index) => {
+              const event =
+                events.find(
+                  (e) =>
+                    e.stage ===
+                    stage.id
+                );
 
-          // Positioning logic for connecting lines (simplified visual trick for web)
-          const lineStyle = {
-            width: '100%',
-            left: index === 0 ? '50%' : '-50%'
-          };
+              const isCompleted =
+                !!event;
 
-          return (
-            <div key={stage.id} className="flex-1 flex flex-col items-center relative min-h-[100px] mb-8 md:mb-0">
-              {/* Connector line (desktop) */}
-              {index > 0 && (
-                <div 
-                  className={`absolute top-[32px] -left-1/2 w-full h-[3px] -z-10 rounded-full`} 
-                  style={{ background: isCompleted ? '#22c55e' : isCurrent ? 'linear-gradient(90deg, #22c55e 50%, #f1f5f9 50%)' : '#f1f5f9' }}
-                />
-              )}
+              const isCurrent =
+                stage.id ===
+                currentStage;
 
-              {/* Warning Tags above circles */}
-              <div className="h-10 w-full flex justify-center items-end pb-3 absolute -top-14">
-                {isDelayed && <span className="bg-amber-50 text-amber-600 text-[9px] uppercase px-2.5 py-1 rounded-full border border-amber-100 flex items-center gap-1 font-black shadow-sm tracking-widest animate-bounce"><Clock className="w-3 h-3"/> Delayed</span>}
-                {isMissing && <span className="bg-red-50 text-red-600 text-[9px] uppercase px-2.5 py-1 rounded-full border border-red-100 flex items-center gap-1 font-black shadow-sm tracking-widest"><ShieldAlert className="w-3 h-3"/> Missing</span>}
-              </div>
+              const isMissing =
+                gapAnalysis?.missingStages?.includes(
+                  stage.id
+                );
 
-              {/* Stage Circle */}
-              <div 
-                className={`${circleClasses} cursor-pointer group/circle`}
-                onClick={() => event && setExpandedStage(expandedStage === stage.id ? null : stage.id)}
-              >
-                {isCompleted ? <Check className="w-6 h-6 text-white" /> : <div className="w-4 h-4 rounded-full bg-current opacity-20 group-hover/circle:opacity-50 transition-opacity" />}
-              </div>
+              const isDelayed =
+                gapAnalysis?.delayedStages?.includes(
+                  stage.id
+                );
 
-              <div className={textClasses}>{stage.label}</div>
+              let circleClasses =
+                'w-24 h-24 rounded-[32px] flex items-center justify-center border-[6px] transition-all duration-300 relative';
 
-              {/* Expanded Card Details */}
-              {expandedStage === stage.id && event && (
-                <div className="absolute top-32 left-1/2 -translate-x-1/2 w-72 bg-white border border-slate-200 rounded-[2rem] p-6 shadow-2xl z-20 text-left animate-in fade-in zoom-in duration-200">
-                  <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-50">
-                    <span className="text-[9px] bg-gray-50 text-gray-500 px-2.5 py-1 rounded-full border border-slate-100 uppercase font-black tracking-widest">{event.role}</span>
-                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-tight">{new Date(event.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <h4 className="font-black text-gray-900 mb-1 text-sm font-poppins">{event.actor}</h4>
-                  <div className="flex items-center gap-2 text-[11px] text-gray-500 mb-4 font-bold tracking-tight"><MapPin className="w-3.5 h-3.5 text-orange-500" /> {event.location}</div>
-                  
-                  {(event.temperature || event.humidity) && (
-                    <div className="bg-gray-50 rounded-2xl p-3 mb-4 flex justify-between text-[11px] font-mono border border-slate-100">
-                      {event.temperature && <div>T: <span className="text-orange-600 font-black">{event.temperature}°C</span></div>}
-                      {event.humidity && <div>H: <span className="text-blue-600 font-black">{event.humidity}%</span></div>}
-                    </div>
+              let textClasses =
+                'text-sm font-black mt-5 text-center uppercase tracking-widest';
+
+              if (isCompleted) {
+                circleClasses +=
+                  ' bg-emerald-500 border-emerald-50 shadow-xl shadow-emerald-500/20';
+
+                textClasses +=
+                  ' text-emerald-600';
+              } else if (
+                isCurrent
+              ) {
+                circleClasses +=
+                  ' bg-orange-500 border-orange-50 shadow-2xl shadow-orange-500/20 animate-pulse scale-110';
+
+                textClasses +=
+                  ' text-orange-500';
+              } else if (
+                isMissing
+              ) {
+                circleClasses +=
+                  ' bg-white border-red-100';
+
+                textClasses +=
+                  ' text-red-500';
+              } else {
+                circleClasses +=
+                  ' bg-white border-slate-200';
+
+                textClasses +=
+                  ' text-slate-300';
+              }
+
+              return (
+                <div
+                  key={stage.id}
+                  className="flex flex-col items-center relative w-[160px]"
+                >
+
+                  {/* Progress Line */}
+
+                  {index > 0 && (
+                    <div
+                      className="absolute top-[58px] -left-[80px] w-[160px] h-[6px] rounded-full -z-10"
+                      style={{
+                        background:
+                          isCompleted
+                            ? '#10b981'
+                            : isCurrent
+                            ? 'linear-gradient(90deg, #10b981 50%, #e2e8f0 50%)'
+                            : '#e2e8f0'
+                      }}
+                    />
                   )}
-                  {event.notes && <p className="text-[11px] text-gray-500 mb-4 bg-gray-50/80 p-3 rounded-2xl italic border border-slate-100/50 leading-relaxed">"{event.notes}"</p>}
-                  <div className="text-[9px] text-gray-400 font-mono break-all group/hash relative cursor-help bg-slate-50 p-2 rounded-lg border border-slate-100">
-                    <span className="font-black text-gray-400 uppercase mr-1">Hash:</span> {event.event_hash.substring(0, 24)}...
-                    <div className="hidden group-hover/hash:block absolute bottom-full mb-3 -left-4 w-56 bg-gray-900 text-white p-3 rounded-2xl text-[10px] z-30 shadow-2xl leading-relaxed">
-                      This cryptographic hash ensures event data was not tampered with on the immutable ledger.
-                    </div>
+
+                  {/* Tags */}
+
+                  <div className="h-12 flex items-end mb-4">
+
+                    {isDelayed && (
+                      <div className="bg-orange-50 border border-orange-100 text-orange-600 px-3 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
+
+                        <Clock className="w-3 h-3" />
+
+                        Delayed
+
+                      </div>
+                    )}
+
+                    {isMissing && (
+                      <div className="bg-red-50 border border-red-100 text-red-600 px-3 py-2 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 shadow-sm">
+
+                        <ShieldAlert className="w-3 h-3" />
+
+                        Missing
+
+                      </div>
+                    )}
+
                   </div>
+
+                  {/* Circle */}
+
+                  <button
+                    onClick={() =>
+                      event &&
+                      setExpandedStage(
+                        expandedStage ===
+                          stage.id
+                          ? null
+                          : stage.id
+                      )
+                    }
+                    className={`${circleClasses} group`}
+                  >
+
+                    {isCompleted ? (
+                      <Check className="w-9 h-9 text-white" />
+                    ) : (
+                      <div className="w-5 h-5 rounded-full bg-current opacity-20 group-hover:opacity-50 transition-all" />
+                    )}
+
+                  </button>
+
+                  {/* Label */}
+
+                  <div
+                    className={
+                      textClasses
+                    }
+                  >
+
+                    {stage.label}
+
+                  </div>
+
+                  {/* Card */}
+
+                  {expandedStage ===
+                    stage.id &&
+                    event && (
+                      <div className="absolute top-[180px] left-1/2 -translate-x-1/2 w-[340px] bg-white border border-slate-200 rounded-[36px] p-6 shadow-2xl z-30 animate-in fade-in zoom-in duration-200">
+
+                        {/* Header */}
+
+                        <div className="flex items-center justify-between mb-5 pb-4 border-b border-slate-100">
+
+                          <div className="bg-[#F8FAFC] border border-slate-200 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-500">
+
+                            {event.role}
+
+                          </div>
+
+                          <div className="text-[11px] font-semibold text-slate-400">
+
+                            {new Date(
+                              event.created_at
+                            ).toLocaleDateString()}
+
+                          </div>
+
+                        </div>
+
+                        {/* Actor */}
+
+                        <h3 className="text-2xl font-black text-slate-900 mb-2">
+
+                          {event.actor}
+
+                        </h3>
+
+                        {/* Location */}
+
+                        <div className="flex items-center gap-2 text-slate-500 text-sm font-medium mb-5">
+
+                          <MapPin className="w-4 h-4 text-orange-500" />
+
+                          {event.location}
+
+                        </div>
+
+                        {/* Metrics */}
+
+                        {(event.temperature ||
+                          event.humidity) && (
+                          <div className="bg-[#F8FAFC] border border-slate-200 rounded-3xl p-4 flex justify-between text-sm font-mono mb-5">
+
+                            {event.temperature && (
+                              <div>
+
+                                T:{' '}
+
+                                <span className="font-black text-orange-500">
+
+                                  {
+                                    event.temperature
+                                  }
+                                  °C
+
+                                </span>
+
+                              </div>
+                            )}
+
+                            {event.humidity && (
+                              <div>
+
+                                H:{' '}
+
+                                <span className="font-black text-blue-500">
+
+                                  {
+                                    event.humidity
+                                  }
+                                  %
+
+                                </span>
+
+                              </div>
+                            )}
+
+                          </div>
+                        )}
+
+                        {/* Notes */}
+
+                        {event.notes && (
+                          <div className="bg-slate-50 border border-slate-100 rounded-3xl p-4 text-sm text-slate-600 italic leading-relaxed mb-5">
+
+                            "{event.notes}"
+
+                          </div>
+                        )}
+
+                        {/* Hash */}
+
+                        <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl p-4">
+
+                          <div className="flex items-center gap-2 mb-2">
+
+                            <Sparkles className="w-4 h-4 text-emerald-500" />
+
+                            <span className="text-[10px] uppercase tracking-widest font-black text-slate-400">
+
+                              Blockchain Hash
+
+                            </span>
+
+                          </div>
+
+                          <p className="text-[11px] font-mono text-slate-500 break-all leading-relaxed">
+
+                            {event.event_hash.substring(
+                              0,
+                              40
+                            )}
+                            ...
+
+                          </p>
+
+                        </div>
+
+                      </div>
+                    )}
+
                 </div>
-              )}
-            </div>
-          );
-        })}
+              );
+            }
+          )}
+
+        </div>
       </div>
     </div>
   );

@@ -3,8 +3,10 @@ import { supabase } from '../../../config/supabase';
 import { AlertTriangle, CheckCircle, ShieldAlert, Thermometer, Info, Clock, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useNotifications } from '../../../context/NotificationContext';
 
 const AlertsCenter = () => {
+  const { addNotification } = useNotifications();
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -37,7 +39,7 @@ const AlertsCenter = () => {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
       if (res.ok) {
-        toast.success("Alert resolved!");
+        addNotification("✅ Alert resolved successfully", "success");
         fetchAlerts();
       } else {
         throw new Error('Failed to resolve alert');
@@ -79,10 +81,10 @@ const AlertsCenter = () => {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2 font-poppins">
-          <AlertTriangle className="text-orange-500 w-6 h-6" /> Alerts Center
+        <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <AlertTriangle className="text-red-500 w-6 h-6" /> Alerts Center
         </h2>
-        <p className="text-gray-500 text-sm mt-1 font-medium">Manage network anomalies, AI insights, and supply chain integrity issues.</p>
+        <p className="text-slate-500 text-sm mt-1">Manage network anomalies, AI insights, and supply chain integrity issues.</p>
       </div>
 
       {/* Filter Tabs */}
@@ -91,16 +93,13 @@ const AlertsCenter = () => {
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
-            className={`px-6 py-3 font-black text-xs uppercase tracking-widest transition-all relative ${
+            className={`px-6 py-3 font-bold text-xs uppercase tracking-widest transition-all relative rounded-2xl ${
               activeFilter === f 
-                ? 'text-orange-600' 
-                : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-t-xl'
+                ? 'bg-slate-900 text-white shadow-sm' 
+                : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'
             }`}
           >
             {f}
-            {activeFilter === f && (
-              <div className="absolute bottom-0 left-0 w-full h-0.5 bg-orange-500 shadow-lg shadow-orange-500/20"></div>
-            )}
           </button>
         ))}
       </div>
@@ -108,8 +107,9 @@ const AlertsCenter = () => {
       {/* Alert Cards */}
       <div className="space-y-4">
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-orange-500 border-t-transparent shadow-lg shadow-orange-500/20"></div>
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent mb-3"></div>
+            <p className="text-slate-400 font-medium">Loading alerts...</p>
           </div>
         ) : filteredAlerts.length === 0 ? (
           <div className="bg-white p-16 rounded-3xl border border-slate-200 text-center shadow-xl">
@@ -178,7 +178,7 @@ const AlertsCenter = () => {
                           {alert.product.name}
                         </Link>
                       ) : (
-                        <span className="font-mono text-sm font-bold text-orange-600">ID: {alert.product_id}</span>
+                        <span className="font-mono text-sm font-bold text-emerald-600">ID: {alert.product_id}</span>
                       )}
                     </h4>
                     
@@ -193,7 +193,7 @@ const AlertsCenter = () => {
                   <div className="p-5 md:p-6 bg-gray-50/50 border-t sm:border-t-0 sm:border-l border-slate-100 flex items-center justify-end sm:justify-center sm:min-w-[180px]">
                     <button 
                       onClick={() => handleResolve(alert.id)}
-                      className="bg-white hover:bg-gray-50 border border-slate-200 text-gray-700 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 w-full sm:w-auto justify-center shadow-sm active:scale-95"
+                    className="bg-white hover:bg-emerald-50 border border-slate-200 hover:border-emerald-200 text-slate-700 hover:text-emerald-700 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 w-full sm:w-auto justify-center shadow-sm"
                     >
                       <CheckCircle className="w-4 h-4 text-green-500" /> Resolve
                     </button>

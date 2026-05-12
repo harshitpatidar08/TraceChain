@@ -1,1 +1,2 @@
-export default function Distributor() { return <div>Distributor</div>; }
+import SharedDashboard from './SharedDashboard';
+export default function Distributor() { return <SharedDashboard roleType="distributor" />; }

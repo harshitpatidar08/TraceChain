@@ -1,40 +1,85 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Bot, User, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, {
+  useState,
+  useRef,
+  useEffect
+} from 'react';
 
-const ChatbotWidget = ({ productContext = null }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
-  const [inputMsg, setInputMsg] = useState('');
-  const [loading, setLoading] = useState(false);
-  
+import {
+  MessageCircle,
+  X,
+  Send,
+  Bot,
+  User,
+  Sparkles
+} from 'lucide-react';
+
+import {
+  motion,
+  AnimatePresence
+} from 'framer-motion';
+
+const ChatbotWidget = ({
+  productContext = null
+}) => {
+  const [isOpen, setIsOpen] =
+    useState(false);
+
+  const [messages, setMessages] =
+    useState([]);
+
+  const [inputMsg, setInputMsg] =
+    useState('');
+
+  const [loading, setLoading] =
+    useState(false);
+
   const endRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
+    if (
+      isOpen &&
+      messages.length === 0
+    ) {
       setMessages([
-        { role: 'assistant', text: "Hello! I am TraceBot. Ask me anything about food safety or product tracking.\n(आप हिंदी में भी पूछ सकते हैं 🙏)" }
+        {
+          role: 'assistant',
+          text:
+            'Hello! I am TraceBot. Ask me anything about food safety or product tracking.\n(आप हिंदी में भी पूछ सकते हैं 🙏)'
+        }
       ]);
     }
   }, [isOpen]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    endRef.current?.scrollIntoView({
+      behavior: 'smooth'
+    });
   }, [messages, loading]);
 
-  const handleSend = async (text = inputMsg) => {
+  const handleSend = async (
+    text = inputMsg
+  ) => {
     if (!text.trim()) return;
 
-    const newMsgs = [...messages, { role: 'user', text }];
+    const newMsgs = [
+      ...messages,
+      {
+        role: 'user',
+        text
+      }
+    ];
+
     setMessages(newMsgs);
     setInputMsg('');
     setLoading(true);
 
     try {
-      const history = messages.map(m => ({
-        role: m.role,
-        content: m.text
-      }));
+      const history = messages.map(
+        (m) => ({
+          role: m.role,
+          content: m.text
+        })
+      );
 
       const payload = {
         message: text,
@@ -42,22 +87,49 @@ const ChatbotWidget = ({ productContext = null }) => {
         conversationHistory: history
       };
 
-      // Depending on Auth Context, the user might not be logged in. Chatbot is public.
-      const res = await fetch('http://localhost:5000/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const res = await fetch(
+        'http://localhost:5000/api/chatbot',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify(payload)
+        }
+      );
 
       const data = await res.json();
+
       if (res.ok) {
-        setMessages([...newMsgs, { role: 'assistant', text: data.reply }]);
+        setMessages([
+          ...newMsgs,
+          {
+            role: 'assistant',
+            text: data.reply
+          }
+        ]);
       } else {
-        setMessages([...newMsgs, { role: 'assistant', text: "Oops, I encountered an error connecting to my brain." }]);
+        setMessages([
+          ...newMsgs,
+          {
+            role: 'assistant',
+            text:
+              'Oops, I encountered an error connecting to my brain.'
+          }
+        ]);
       }
     } catch (error) {
-      setMessages([...newMsgs, { role: 'assistant', text: "Oops, network error occurred." }]);
+      setMessages([
+        ...newMsgs,
+        {
+          role: 'assistant',
+          text:
+            'Oops, network error occurred.'
+        }
+      ]);
     }
+
     setLoading(false);
   };
 
@@ -67,100 +139,247 @@ const ChatbotWidget = ({ productContext = null }) => {
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-      
-      {/* Expanded State */}
-      {isOpen && (
-        <div className="bg-white text-gray-900 w-full max-w-[380px] h-[500px] mb-4 rounded-2xl shadow-[0_10px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-slate-200 transition-all origin-bottom-right">
-          
-          <div className="bg-white text-gray-900 px-5 py-4 flex justify-between items-center z-10 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                  <Bot className="w-6 h-6 text-orange-600" />
+
+      {/* Chat Window */}
+
+      <AnimatePresence>
+
+        {isOpen && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 40,
+              scale: 0.95
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1
+            }}
+            exit={{
+              opacity: 0,
+              y: 30,
+              scale: 0.95
+            }}
+            transition={{
+              duration: 0.25
+            }}
+            className="w-[380px] h-[620px] bg-white border border-slate-200 rounded-[36px] shadow-2xl overflow-hidden flex flex-col mb-4"
+          >
+
+            {/* Header */}
+
+            <div className="relative px-6 py-5 border-b border-slate-100 bg-white">
+
+              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-100 rounded-full blur-3xl opacity-30 pointer-events-none" />
+
+              <div className="relative flex items-center justify-between">
+
+                <div className="flex items-center gap-4">
+
+                  <div className="w-14 h-14 rounded-[20px] bg-emerald-100 flex items-center justify-center shadow-sm relative">
+
+                    <Bot className="w-7 h-7 text-emerald-600" />
+
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full" />
+
+                  </div>
+
+                  <div>
+
+                    <h3 className="text-xl font-black text-slate-900">
+
+                      TraceBot
+
+                    </h3>
+
+                    <div className="flex items-center gap-2 mt-1">
+
+                      <Sparkles className="w-3 h-3 text-orange-500" />
+
+                      <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+
+                        AI Supply Assistant
+
+                      </p>
+
+                    </div>
+                  </div>
                 </div>
-                <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
-              </div>
-              <div>
-                <h3 className="font-bold text-base leading-tight">TraceBot</h3>
-                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">AI Supply Chain Assistant</p>
+
+                <button
+                  onClick={() =>
+                    setIsOpen(false)
+                  }
+                  className="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all"
+                >
+
+                  <X className="w-5 h-5 text-slate-700" />
+
+                </button>
+
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-gray-400 hover:text-gray-900 hover:bg-gray-100 p-1.5 rounded-full transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
 
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50/50 flex flex-col gap-3">
-            {messages.map((msg, i) => (
-              <div key={i} className={`flex max-w-[85%] ${msg.role === 'user' ? 'self-end bg-orange-500 text-white rounded-2xl rounded-tr-sm shadow-orange-200 shadow-md' : 'self-start bg-white border border-slate-200 text-gray-800 rounded-2xl rounded-tl-sm shadow-sm'} p-3 text-sm`}>
-                <div className="whitespace-pre-wrap">{msg.text}</div>
-              </div>
-            ))}
-            
-            {loading && (
-              <div className="self-start bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay:'0.1s'}}></div>
-                  <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce" style={{animationDelay:'0.2s'}}></div>
+            {/* Messages */}
+
+            <div className="flex-1 overflow-y-auto bg-[#F8FAFC] px-5 py-5 space-y-4">
+
+              {messages.map(
+                (msg, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${
+                      msg.role === 'user'
+                        ? 'justify-end'
+                        : 'justify-start'
+                    }`}
+                  >
+
+                    <div
+                      className={`max-w-[85%] rounded-[28px] px-5 py-4 text-sm leading-relaxed shadow-sm ${
+                        msg.role === 'user'
+                          ? 'bg-slate-900 text-white rounded-br-md'
+                          : 'bg-white border border-slate-200 text-slate-700 rounded-bl-md'
+                      }`}
+                    >
+
+                      {msg.text}
+
+                    </div>
+                  </div>
+                )
+              )}
+
+              {loading && (
+                <div className="flex justify-start">
+
+                  <div className="bg-white border border-slate-200 rounded-[24px] rounded-bl-md px-5 py-4 shadow-sm">
+
+                    <div className="flex gap-2">
+
+                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" />
+
+                      <div
+                        className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"
+                        style={{
+                          animationDelay:
+                            '0.1s'
+                        }}
+                      />
+
+                      <div
+                        className="w-2 h-2 rounded-full bg-emerald-400 animate-bounce"
+                        style={{
+                          animationDelay:
+                            '0.2s'
+                        }}
+                      />
+
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={endRef} />
-            
-            {messages.length === 1 && !loading && (
-              <div className="flex flex-wrap gap-2 mt-4 absolute bottom-[80px] p-2 max-w-[370px]">
-                {["Is this product safe?", "What does trust score mean?", "यह उत्पाद कहाँ से आया?", "Why is this in caution?"].map(q => (
-                  <button key={q} onClick={() => handleSuggest(q)} className="bg-white border border-orange-200 text-orange-600 text-[11px] px-3 py-1.5 rounded-full hover:bg-orange-50 font-medium transition-colors shadow-sm">
-                    {q}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+              )}
 
-          <div className="p-3 bg-white border-t border-slate-100">
-            <form onSubmit={e => { e.preventDefault(); handleSend(); }} className="flex gap-2">
-              <input 
-                value={inputMsg}
-                onChange={e => setInputMsg(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-              />
-              <button 
-                type="submit" disabled={!inputMsg.trim() || loading}
-                className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-200 text-white p-2.5 rounded-full transition-all flex items-center justify-center min-w-[40px] shadow-sm active:scale-95"
+              {/* Suggestions */}
+
+              {messages.length === 1 &&
+                !loading && (
+                  <div className="flex flex-wrap gap-2 pt-3">
+
+                    {[
+                      'Is this product safe?',
+                      'What does trust score mean?',
+                      'यह उत्पाद कहाँ से आया?',
+                      'Why is this in caution?'
+                    ].map((q) => (
+                      <button
+                        key={q}
+                        onClick={() =>
+                          handleSuggest(q)
+                        }
+                        className="bg-white border border-slate-200 hover:border-emerald-200 hover:bg-emerald-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-full transition-all"
+                      >
+
+                        {q}
+
+                      </button>
+                    ))}
+
+                  </div>
+                )}
+
+              <div ref={endRef} />
+
+            </div>
+
+            {/* Input */}
+
+            <div className="p-4 bg-white border-t border-slate-100">
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSend();
+                }}
+                className="flex gap-3"
               >
-                <Send className="w-4 h-4 ml-0.5" />
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Collapsed Button */}
-      {!isOpen && (
-        <div className="relative group">
-          <div className="absolute inset-0 rounded-full bg-orange-400 opacity-30 animate-ping" />
-          <motion.button
-            onClick={() => setIsOpen(true)}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            className="flex items-center gap-2 px-4 py-3 
-              bg-gradient-to-r from-orange-500 to-amber-400
-              rounded-full shadow-[0_0_20px_rgba(249,115,22,0.6)]
-              text-white font-semibold text-sm relative z-10 transition-shadow hover:shadow-[0_0_30px_rgba(249,115,22,0.8)]"
-          >
-            <motion.div
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              <Sparkles size={18} />
-            </motion.div>
-            <span>Ask AI</span>
-          </motion.button>
-        </div>
-      )}
+                <input
+                  value={inputMsg}
+                  onChange={(e) =>
+                    setInputMsg(
+                      e.target.value
+                    )
+                  }
+                  placeholder="Ask something..."
+                  className="flex-1 bg-[#F8FAFC] border border-slate-200 rounded-2xl px-5 py-4 text-sm text-slate-900 placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all"
+                />
+
+                <button
+                  type="submit"
+                  disabled={
+                    !inputMsg.trim() ||
+                    loading
+                  }
+                  className="w-14 h-14 rounded-2xl bg-slate-900 hover:bg-slate-800 disabled:opacity-50 text-white flex items-center justify-center transition-all"
+                >
+
+                  <Send className="w-5 h-5" />
+
+                </button>
+
+              </form>
+            </div>
+          </motion.div>
+        )}
+
+      </AnimatePresence>
+
+      {/* Floating Button */}
+
+      {/* Floating Button */}
+
+{!isOpen && (
+  <motion.button
+    onClick={() => setIsOpen(true)}
+    whileHover={{ scale: 1.06 }}
+    whileTap={{ scale: 0.96 }}
+    className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-[24px] bg-slate-900 hover:bg-slate-800 text-white shadow-2xl flex items-center justify-center overflow-hidden border border-slate-700"
+  >
+
+    {/* Glow */}
+    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-orange-400/20" />
+
+    {/* Pulse Ring */}
+    <div className="absolute inset-0 rounded-[24px] border border-emerald-400/30 animate-ping" />
+
+    {/* Icon */}
+    <MessageCircle className="w-7 h-7 relative z-10" />
+
+  </motion.button>
+)}
+      
     </div>
   );
 };
