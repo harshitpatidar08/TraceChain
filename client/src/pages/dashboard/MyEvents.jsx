@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
 import { ListOrdered, Loader2, ArrowRight, Activity } from 'lucide-react';
@@ -10,8 +10,13 @@ const MyEvents = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (!user) return;
+    if (hasFetched.current) return;
     const fetchEvents = async () => {
+      hasFetched.current = true;
       try {
         const actorName = user?.user_metadata?.display_name || user?.email;
         
@@ -31,9 +36,7 @@ const MyEvents = () => {
       setLoading(false);
     };
 
-    if (user) {
-      fetchEvents();
-    }
+    fetchEvents();
   }, [user]);
 
   const stageColors = {
@@ -43,6 +46,30 @@ const MyEvents = () => {
     retail: 'bg-orange-100 text-orange-700',
     consumer: 'bg-slate-100 text-slate-700'
   };
+
+  const EventRow = memo(({ ev }) => (
+    <tr className="hover:bg-slate-50/50 transition-colors">
+      <td className="px-6 py-4">
+        <Link to={`/dashboard/product/${ev.product_id}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors flex items-center gap-2">
+          <Activity className="w-4 h-4 text-slate-400" />
+          {ev.product?.name || ev.product_id}
+        </Link>
+      </td>
+      <td className="px-6 py-4">
+        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${stageColors[ev.stage] || 'bg-slate-100 text-slate-600'}`}>
+          {ev.stage}
+        </span>
+      </td>
+      <td className="px-6 py-4 truncate max-w-[200px] text-slate-500" title={ev.location}>{ev.location}</td>
+      <td className="px-6 py-4 font-semibold text-slate-900">{ev.temperature ? `${ev.temperature}°C` : '-'}</td>
+      <td className="px-6 py-4 text-slate-400">{new Date(ev.created_at).toLocaleString()}</td>
+      <td className="px-6 py-4">
+        <div className="font-mono text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full inline-block tracking-wider" title={ev.event_hash}>
+          {ev.event_hash ? `${ev.event_hash.substring(0, 12)}...` : 'Pending'}
+        </div>
+      </td>
+    </tr>
+  ));
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -73,9 +100,23 @@ const MyEvents = () => {
       {/* Events Table */}
       <div className="bg-white/90 backdrop-blur-sm border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mb-3" />
-            <p className="text-slate-400 font-medium">Loading your events...</p>
+          <div className="w-full">
+            <div className="bg-slate-50 border-b border-slate-100 h-12 w-full flex items-center px-6 gap-4">
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="px-6 py-4 border-b border-slate-50 flex items-center gap-4 animate-pulse">
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+              </div>
+            ))}
           </div>
         ) : events.length === 0 ? (
           <div className="p-16 text-center">
@@ -102,27 +143,7 @@ const MyEvents = () => {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {events.map(ev => (
-                  <tr key={ev.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <Link to={`/dashboard/product/${ev.product_id}`} className="font-semibold text-slate-900 hover:text-emerald-600 transition-colors flex items-center gap-2">
-                        <Activity className="w-4 h-4 text-slate-400" />
-                        {ev.product?.name || ev.product_id}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${stageColors[ev.stage] || 'bg-slate-100 text-slate-600'}`}>
-                        {ev.stage}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 truncate max-w-[200px] text-slate-500" title={ev.location}>{ev.location}</td>
-                    <td className="px-6 py-4 font-semibold text-slate-900">{ev.temperature ? `${ev.temperature}°C` : '-'}</td>
-                    <td className="px-6 py-4 text-slate-400">{new Date(ev.created_at).toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      <div className="font-mono text-[11px] text-emerald-700 font-bold bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-full inline-block tracking-wider" title={ev.event_hash}>
-                        {ev.event_hash ? `${ev.event_hash.substring(0, 12)}...` : 'Pending'}
-                      </div>
-                    </td>
-                  </tr>
+                  <EventRow key={ev.id} ev={ev} />
                 ))}
               </tbody>
             </table>

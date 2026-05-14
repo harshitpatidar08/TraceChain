@@ -1,6 +1,6 @@
 import express from 'express';
 import crypto from 'node:crypto';
-import { supabase } from '../config/supabase.js';
+import { supabase, getUserSupabase } from '../config/supabase.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { logEventToBlockchain } from '../services/blockchainService.js';
 
@@ -11,8 +11,10 @@ router.post('/log', authMiddleware, async (req, res) => {
   try {
     const { product_id, stage, role, actor, location, temperature, humidity, notes } = req.body;
 
+    const userSupabase = getUserSupabase(req);
+
     // Fetch latest event to get previous_hash
-    const { data: latestEvent, error: latestError } = await supabase
+    const { data: latestEvent, error: latestError } = await userSupabase
       .from('supply_chain_events')
       .select('event_hash')
       .eq('product_id', product_id)
@@ -52,7 +54,7 @@ router.post('/log', authMiddleware, async (req, res) => {
       previous_hash: previousHash
     };
 
-    const { data: event, error: insertError } = await supabase
+    const { data: event, error: insertError } = await userSupabase
       .from('supply_chain_events')
       .insert(eventPayload)
       .select()
@@ -61,7 +63,7 @@ router.post('/log', authMiddleware, async (req, res) => {
     if (insertError) throw insertError;
 
     // Update products.current_stage
-    const { error: updateError } = await supabase
+    const { error: updateError } = await userSupabase
       .from('products')
       .update({ current_stage: stage })
       .eq('id', product_id);
@@ -72,7 +74,7 @@ router.post('/log', authMiddleware, async (req, res) => {
     try {
       const txHash = await logEventToBlockchain(event.id, stage, role, hash);
       if (txHash) {
-        await supabase
+        await userSupabase
           .from('supply_chain_events')
           .update({ blockchain_tx_hash: txHash })
           .eq('id', event.id);

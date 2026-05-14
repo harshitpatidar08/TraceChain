@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../config/supabase';
 import { Search, Package, AlertTriangle, Eye, Loader2, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -23,7 +23,11 @@ const AllProducts = () => {
     setLoading(false);
   };
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchProducts();
   }, []);
 
@@ -131,8 +135,23 @@ const AllProducts = () => {
       {/* Table */}
       <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
+          <div className="w-full">
+            <div className="bg-gray-50/50 border-b border-slate-100 h-12 w-full flex items-center px-6 gap-4">
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/6"></div>
+            </div>
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="px-6 py-4 border-b border-slate-50 flex items-center gap-4 animate-pulse">
+                <div className="flex-1 space-y-2"><div className="h-4 bg-slate-200 rounded w-3/4"></div><div className="h-3 bg-slate-100 rounded w-1/2"></div></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+                <div className="h-5 bg-slate-100 rounded w-1/6"></div>
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="p-16 text-center text-gray-400">

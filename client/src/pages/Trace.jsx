@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, ShieldCheck, AlertCircle, CalendarDays, Loader2, Copy, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -20,8 +20,12 @@ const Trace = () => {
   const [error, setError] = useState(null);
   const [computed, setComputed] = useState({ score: 0, gapAnalysis: null });
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
     const fetchTraceData = async () => {
+      hasFetched.current = true;
       setLoading(true);
       try {
         const { data: productData, error: productError } = await supabase
@@ -69,14 +73,23 @@ const Trace = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans pb-24 animate-pulse">
         <div className="fixed top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-30 -z-10" />
         <div className="fixed bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-30 -z-10" />
-        <div className="w-16 h-16 rounded-[20px] bg-white border border-slate-200 shadow-sm flex items-center justify-center mb-6">
-          <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+        
+        <div className="h-40 bg-white border-b border-slate-100 relative"></div>
+        
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-14 z-10 relative space-y-8">
+          <div className="bg-white/90 backdrop-blur-sm p-6 md:p-10 rounded-[36px] shadow-sm border border-slate-200 h-64">
+            <div className="h-8 bg-slate-200 rounded w-1/3 mb-4"></div>
+            <div className="h-12 bg-slate-200 rounded w-2/3 mb-6"></div>
+            <div className="h-6 bg-slate-200 rounded w-1/2"></div>
+          </div>
+          
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm h-16 w-full"></div>
+          
+          <div className="bg-white rounded-[28px] border border-slate-200 shadow-sm h-96 w-full"></div>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 mb-2">Tracing Product Journey...</h2>
-        <p className="text-xs text-slate-400 font-mono font-bold uppercase tracking-widest bg-[#F8FAFC] px-4 py-2 rounded-full border border-slate-200">Fetching ledger blocks for {traceId}</p>
       </div>
     );
   }

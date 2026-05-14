@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../config/supabase';
 import { Package, AlertTriangle, BarChart3, Activity, CheckCircle, ArrowRight } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
@@ -52,7 +52,11 @@ const Overview = () => {
     setLoading(false);
   };
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchData();
   }, []);
 
@@ -76,7 +80,22 @@ const Overview = () => {
   };
 
   if (loading) {
-    return <div className="flex flex-col justify-center items-center py-20"><div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent mb-3"></div><p className="text-slate-400 font-medium">Loading overview...</p></div>;
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="mb-4">
+          <div className="h-8 bg-slate-200 rounded w-1/4 mb-2"></div>
+          <div className="h-4 bg-slate-100 rounded w-1/3"></div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map(i => <div key={i} className="bg-slate-200 rounded-2xl h-32"></div>)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-slate-200 rounded-2xl h-[350px]"></div>
+          <div className="bg-slate-200 rounded-2xl h-[350px]"></div>
+        </div>
+        <div className="bg-slate-200 rounded-2xl h-64"></div>
+      </div>
+    );
   }
 
   return (

@@ -1,5 +1,5 @@
 import express from 'express';
-import { supabase } from '../config/supabase.js';
+import { supabase, getUserSupabase } from '../config/supabase.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { generateQR } from '../services/qrService.js';
 
@@ -21,8 +21,10 @@ router.post('/register', authMiddleware, async (req, res) => {
       first_event 
     } = req.body;
 
+    const userSupabase = getUserSupabase(req);
+
     // Fetch existing count to generate Trace ID
-    const { count, error: countError } = await supabase
+    const { count, error: countError } = await userSupabase
       .from('products')
       .select('id', { count: 'exact' })
       .like('id', `TC-${new Date().getFullYear()}-${category.toUpperCase()}-%`);
@@ -48,7 +50,7 @@ router.post('/register', authMiddleware, async (req, res) => {
       registered_by: req.user.id
     };
 
-    const { data: product, error: productError } = await supabase
+    const { data: product, error: productError } = await userSupabase
       .from('products')
       .insert(productPayload)
       .select()
@@ -71,7 +73,7 @@ router.post('/register', authMiddleware, async (req, res) => {
         previous_hash: 'GENESIS'
       };
 
-      const { error: eventError } = await supabase
+      const { error: eventError } = await userSupabase
         .from('supply_chain_events')
         .insert(eventPayload);
 
@@ -115,7 +117,8 @@ router.get('/:traceId', async (req, res) => {
 // GET /my/products
 router.get('/my/products', authMiddleware, async (req, res) => {
   try {
-    const { data: products, error } = await supabase
+    const userSupabase = getUserSupabase(req);
+    const { data: products, error } = await userSupabase
       .from('products')
       .select('*')
       .eq('registered_by', req.user.id);
@@ -133,7 +136,9 @@ router.patch('/:id/status', authMiddleware, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const { data, error } = await supabase
+    const userSupabase = getUserSupabase(req);
+
+    const { data, error } = await userSupabase
       .from('products')
       .update({ status })
       .eq('id', id)

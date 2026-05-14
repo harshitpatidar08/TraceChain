@@ -25,20 +25,19 @@ import Auth from './pages/Auth';
 import Landing from './pages/Landing';
 import Scanner from './pages/Scanner';
 import Trace from './pages/Trace';
-/* Farmer */
-import MyProducts from './pages/dashboard/farmer/MyProducts';
-import RegisterProduct from './pages/dashboard/farmer/RegisterProduct';
-/* Shared Stakeholder Pages */
-import ScanAndLog from './pages/dashboard/ScanAndLog';
-import MyEvents from './pages/dashboard/MyEvents';
-import SearchProduct from './pages/dashboard/SearchProduct';
-import Profile from './pages/dashboard/Profile';
-import ProductDetail from './pages/dashboard/ProductDetail';
-/* Admin */
-import Overview from './pages/dashboard/admin/Overview';
-import AlertsCenter from './pages/dashboard/admin/AlertsCenter';
-import AllProducts from './pages/dashboard/admin/AllProducts';
-import AllEvents from './pages/dashboard/admin/AllEvents';
+
+/* Lazy Loaded Dashboard Pages */
+const MyProducts = React.lazy(() => import('./pages/dashboard/farmer/MyProducts'));
+const RegisterProduct = React.lazy(() => import('./pages/dashboard/farmer/RegisterProduct'));
+const ScanAndLog = React.lazy(() => import('./pages/dashboard/ScanAndLog'));
+const MyEvents = React.lazy(() => import('./pages/dashboard/MyEvents'));
+const SearchProduct = React.lazy(() => import('./pages/dashboard/SearchProduct'));
+const Profile = React.lazy(() => import('./pages/dashboard/Profile'));
+const ProductDetail = React.lazy(() => import('./pages/dashboard/ProductDetail'));
+const Overview = React.lazy(() => import('./pages/dashboard/admin/Overview'));
+const AlertsCenter = React.lazy(() => import('./pages/dashboard/admin/AlertsCenter'));
+const AllProducts = React.lazy(() => import('./pages/dashboard/admin/AllProducts'));
+const AllEvents = React.lazy(() => import('./pages/dashboard/admin/AllEvents'));
 
 /* Role Redirect */
 
@@ -140,7 +139,7 @@ function App() {
           <div className="fixed bottom-0 right-0 w-[500px] h-[500px] bg-orange-100 rounded-full blur-3xl opacity-30 pointer-events-none -z-10" />
 
           {/* ROUTES */}
-
+          <React.Suspense fallback={<div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center"><div className="animate-pulse w-12 h-12 rounded-full bg-emerald-100 border-4 border-emerald-500 border-t-transparent"></div></div>}>
           <Routes>
 
             {/* PUBLIC ROUTES */}
@@ -371,6 +370,7 @@ function App() {
             </Route>
 
           </Routes>
+          </React.Suspense>
 
         </div>
 

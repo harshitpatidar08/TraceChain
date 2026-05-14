@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
-          await fetchRole(session.user.id);
+          await fetchRole(session.user.id, session.user.user_metadata);
         }
       } catch (err) {
         console.error('Error fetching session:', err);
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       if (mounted) setLoading(true);
       if (session?.user) {
         setUser(session.user);
-        await fetchRole(session.user.id);
+        await fetchRole(session.user.id, session.user.user_metadata);
       } else {
         setUser(null);
         setRole(null);
@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const fetchRole = async (userId) => {
+  const fetchRole = async (userId, userMetadata = {}) => {
     try {
       // Always fetch fresh from users_extended table, ignore userMetadata cache
       const { data, error } = await supabase
@@ -66,7 +66,23 @@ export const AuthProvider = ({ children }) => {
         .single();
         
       if (error) {
-        if (error.code === 'PGRST116') return null;
+        if (error.code === 'PGRST116') {
+          // Auto-create profile with role from metadata or default to farmer
+          const defaultRole = userMetadata.role || 'farmer';
+          try {
+            await supabase.from('users_extended').insert({
+              user_id: userId,
+              role: defaultRole,
+              display_name: userMetadata.display_name || '',
+              organization: userMetadata.organization || ''
+            });
+            setRole(defaultRole);
+            return defaultRole;
+          } catch (e) {
+            console.error('Error auto-creating profile:', e);
+            return null;
+          }
+        }
         throw error;
       }
       
@@ -80,22 +96,19 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      // Safety timeout to prevent hanging login buttons
+      const loginPromise = supabase.auth.signInWithPassword({ email, password });
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Login timed out. Please check your connection.")), 15000)
+      );
+
+      const { data, error } = await Promise.race([loginPromise, timeout]);
       if (error) throw error;
       
-      if (data.user) {
-        // Fetch role with our new resilient fetchRole
-        const userRole = await fetchRole(data.user.id);
-        
-        // Redirect based on role
-        if (userRole) {
-          navigate('/dashboard');
-        } else {
-          // If no role found even in metadata, default to farmer or show error
-          toast.error("Account profile not fully set up.");
-          navigate('/dashboard');
-        }
-      }
+      // We no longer manually fetch role or navigate here.
+      // onAuthStateChange listener will detect the SIGNED_IN event,
+      // call fetchRole, update user/role states, and Auth.jsx's useEffect
+      // will handle the navigation to /dashboard.
       
       return true;
     } catch (err) {
@@ -134,25 +147,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       if (data?.user) {
-        console.log("User created in Auth, setting role...");
-        setRole(selectedRole);
-
-        // 2. Attempt to insert into users_extended
-        try {
-          const { error: profileError } = await supabase
-            .from('users_extended')
-            .insert({
-              user_id: data.user.id,
-              role: selectedRole,
-              display_name: displayName,
-              organization
-            });
-          
-          if (profileError) console.warn("Extended profile creation warning:", profileError.message);
-        } catch (e) {
-          console.warn("Table insert caught error:", e);
-        }
-        
         toast.success('Account created successfully!');
         navigate('/dashboard');
         return true;
@@ -180,76 +174,10 @@ export const AuthProvider = ({ children }) => {
     navigate('/');
   };
 
-  if (loading) {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden relative">
-
-      {/* Background Glow */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-40" />
-
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-40" />
-
-      {/* Loader Card */}
-      <div className="relative bg-white border border-slate-200 rounded-[36px] px-12 py-14 shadow-sm flex flex-col items-center max-w-md w-full">
-
-        {/* Animated Logo */}
-        <div className="relative mb-8">
-
-          <div className="w-24 h-24 rounded-[32px] bg-emerald-100 flex items-center justify-center animate-pulse">
-
-            <svg
-              className="w-12 h-12 text-emerald-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12l2 2l4-4m5-2a9 9 0 11-18 0a9 9 0 0118 0z"
-              />
-            </svg>
-
-          </div>
-
-          {/* Spinner Ring */}
-          <div className="absolute inset-0 rounded-[32px] border-4 border-emerald-200 border-t-emerald-500 animate-spin"></div>
-
-        </div>
-
-        {/* Brand */}
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-3">
-
-          TraceChain
-
-        </h1>
-
-        <p className="text-slate-500 text-center leading-relaxed mb-8">
-
-          Initializing secure blockchain authentication
-          and loading your dashboard experience.
-
-        </p>
-
-        {/* Loading Bar */}
-
-        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-
-          <div className="h-full w-1/2 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full animate-pulse"></div>
-
-        </div>
-
-        <p className="text-sm text-slate-400 mt-5">
-
-          Verifying session...
-
-        </p>
-
-      </div>
-    </div>
-  );
-}
+  // Removed artificial loading delay to show content immediately
+  // if (loading) {
+  //   return <div className="min-h-screen bg-[#F8FAFC]"></div>;
+  // }
 
 return (
   <AuthContext.Provider

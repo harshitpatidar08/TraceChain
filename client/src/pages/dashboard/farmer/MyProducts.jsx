@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { supabase } from '../../../config/supabase';
 import { Link, useNavigate } from 'react-router-dom';
@@ -35,7 +35,11 @@ const MyProducts = () => {
     setLoading(false);
   };
 
+  const hasFetched = useRef(false);
+
   useEffect(() => {
+    if (hasFetched.current) return;
+    hasFetched.current = true;
     fetchProducts();
   }, []);
 
@@ -83,6 +87,72 @@ const MyProducts = () => {
     document.body.removeChild(link);
   };
 
+  const ProductCard = memo(({ product }) => {
+    const expInfo = getExpiryInfo(product);
+    return (
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+        {/* Top: Name & Status */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
+            <p className="text-xs font-mono text-emerald-600 mt-1 font-bold">{product.id}</p>
+          </div>
+          {getStatusBadge(product.status)}
+        </div>
+
+        {/* Middle: Category & Trust Score */}
+        <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-50">
+          <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-200">
+            <Package className="w-3.5 h-3.5" /> {product.category}
+          </span>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Trust Score</span>
+            <span className={`px-2 py-0.5 rounded font-mono font-bold text-sm border
+              ${product.trust_score > 80 ? 'bg-green-50 text-green-700 border-green-100' : 
+                product.trust_score > 50 ? 'bg-orange-50 text-orange-700 border-orange-100' : 
+                'bg-red-50 text-red-700 border-red-100'}`}>
+              {product.trust_score}
+            </span>
+          </div>
+        </div>
+
+        {/* Info Row: Origin & Expiry */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5" /> Origin
+            </span>
+            <span className="text-sm text-gray-700 font-medium truncate" title={product.origin}>{product.origin}</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" /> Expiry
+            </span>
+            <span className={`text-sm font-bold text-${expInfo.color === 'orange' ? 'orange' : expInfo.color === 'green' ? 'green' : 'red'}-600`}>
+              {product.exp_date ? new Date(product.exp_date).toLocaleDateString() : 'N/A'}
+            </span>
+          </div>
+        </div>
+
+        {/* Hidden QR SVG for downloading */}
+        <div className="hidden">
+          <QRCodeSVG id={`qr-${product.id}`} value={`https://tracechain.app/trace/${product.id}`} size={256} />
+        </div>
+
+        {/* Bottom Row: Actions */}
+        <div className="flex gap-3 mt-auto">
+          <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-slate-900 hover:bg-slate-800 transition-all text-white py-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+            <Activity className="w-4 h-4" /> View Journey
+          </button>
+          <button onClick={() => downloadQR(product.id)} className="bg-white border border-slate-200 hover:bg-gray-50 transition-colors text-gray-600 px-4 py-2.5 rounded-xl flex items-center justify-center shadow-sm">
+            <Download className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  });
+
   return (
     <div className="space-y-6">
       {/* Header Row */}
@@ -97,8 +167,21 @@ const MyProducts = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center py-20">
-          <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-500 border-t-transparent"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm animate-pulse h-64">
+              <div className="flex justify-between items-start mb-4">
+                <div className="h-6 bg-slate-200 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-slate-200 rounded w-1/4"></div>
+              </div>
+              <div className="h-10 bg-slate-100 rounded mb-4"></div>
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="h-10 bg-slate-100 rounded"></div>
+                <div className="h-10 bg-slate-100 rounded"></div>
+              </div>
+              <div className="h-10 bg-slate-200 rounded"></div>
+            </div>
+          ))}
         </div>
       ) : products.length === 0 ? (
         <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center shadow-sm">
@@ -113,71 +196,9 @@ const MyProducts = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {products.map(product => {
-            const expInfo = getExpiryInfo(product);
-            return (
-              <div key={product.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-                {/* Top: Name & Status */}
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900">{product.name}</h3>
-                    <p className="text-xs font-mono text-emerald-600 mt-1 font-bold">{product.id}</p>
-                  </div>
-                  {getStatusBadge(product.status)}
-                </div>
-
-                {/* Middle: Category & Trust Score */}
-                <div className="flex items-center justify-between mb-4 pb-4 border-b border-slate-50">
-                  <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-slate-200">
-                    <Package className="w-3.5 h-3.5" /> {product.category}
-                  </span>
-                  
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Trust Score</span>
-                    <span className={`px-2 py-0.5 rounded font-mono font-bold text-sm border
-                      ${product.trust_score > 80 ? 'bg-green-50 text-green-700 border-green-100' : 
-                        product.trust_score > 50 ? 'bg-orange-50 text-orange-700 border-orange-100' : 
-                        'bg-red-50 text-red-700 border-red-100'}`}>
-                      {product.trust_score}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Info Row: Origin & Expiry */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5" /> Origin
-                    </span>
-                    <span className="text-sm text-gray-700 font-medium truncate" title={product.origin}>{product.origin}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" /> Expiry
-                    </span>
-                    <span className={`text-sm font-bold text-${expInfo.color === 'orange' ? 'orange' : expInfo.color === 'green' ? 'green' : 'red'}-600`}>
-                      {product.exp_date ? new Date(product.exp_date).toLocaleDateString() : 'N/A'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Hidden QR SVG for downloading */}
-                <div className="hidden">
-                  <QRCodeSVG id={`qr-${product.id}`} value={`https://tracechain.app/trace/${product.id}`} size={256} />
-                </div>
-
-                {/* Bottom Row: Actions */}
-                <div className="flex gap-3 mt-auto">
-                  <button onClick={() => navigate(`/dashboard/product/${product.id}`)} className="flex-1 bg-slate-900 hover:bg-slate-800 transition-all text-white py-2.5 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
-                    <Activity className="w-4 h-4" /> View Journey
-                  </button>
-                  <button onClick={() => downloadQR(product.id)} className="bg-white border border-slate-200 hover:bg-gray-50 transition-colors text-gray-600 px-4 py-2.5 rounded-xl flex items-center justify-center shadow-sm">
-                    <Download className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {products.map(product => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
       )}
     </div>
