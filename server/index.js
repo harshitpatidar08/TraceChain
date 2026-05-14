@@ -28,14 +28,18 @@ app.use('/api/events', eventsRouter);
 app.use('/api/alerts', alertsRouter);
 app.use('/api/chatbot', chatbotRouter);
 
-// Serve the static Vite build files from the client directory
+// 1. Serve static assets directly from the compiled frontend directory
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// Route ALL other non-API requests to the React application
-app.get('/(.*)', (req, res) => {
+// 2. Express v5 compliant fallback middleware (No string wildcards)
+app.use((req, res, next) => {
+  // If the request is for an API endpoint that doesn't exist, pass it along
+  if (req.url.startsWith('/api/')) {
+    return next();
+  }
+  // Otherwise, send the frontend index file to handle routing
   res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
-
 
 // Initialize node-cron
 // Run aiRiskService every 30 minutes
