@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import cron from 'node-cron';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import productsRouter from './routes/products.js';
 import eventsRouter from './routes/events.js';
@@ -13,6 +15,9 @@ dotenv.config();
 
 const app = express();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -23,8 +28,12 @@ app.use('/api/events', eventsRouter);
 app.use('/api/alerts', alertsRouter);
 app.use('/api/chatbot', chatbotRouter);
 
-app.get("/", (req, res) => {
-  res.send("TraceChain API is running");
+// Serve the static Vite build files from the client directory
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// Route ALL other non-API requests to the React application
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
 
 // Initialize node-cron
