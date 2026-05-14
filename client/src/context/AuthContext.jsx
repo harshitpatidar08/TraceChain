@@ -13,22 +13,18 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
-    
-    // Add a maximum timeout of 3 seconds
-    const timeoutId = setTimeout(() => {
-      if (mounted) setLoading(false);
-    }, 3000);
 
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        if (mounted && session?.user) {
           setUser(session.user);
           await fetchRole(session.user.id, session.user.user_metadata);
         }
       } catch (err) {
         console.error('Error fetching session:', err);
       } finally {
+        // Only the finally block controls loading — no race-condition timeout
         if (mounted) setLoading(false);
       }
     };
@@ -36,9 +32,20 @@ export const AuthProvider = ({ children }) => {
     initAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // INITIAL_SESSION is handled by initAuth above
       if (event === 'INITIAL_SESSION') return;
+
+      if (!mounted) return;
       
-      if (mounted) setLoading(true);
+      // Do not block UI on token refresh or user update, just silently update user
+      if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+        if (session?.user) {
+          setUser(session.user);
+        }
+        return;
+      }
+
+      setLoading(true);
       if (session?.user) {
         setUser(session.user);
         await fetchRole(session.user.id, session.user.user_metadata);
@@ -51,7 +58,6 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       mounted = false;
-      clearTimeout(timeoutId);
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -96,20 +102,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Safety timeout to prevent hanging login buttons
-      const loginPromise = supabase.auth.signInWithPassword({ email, password });
-      const timeout = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Login timed out. Please check your connection.")), 15000)
-      );
-
-      const { data, error } = await Promise.race([loginPromise, timeout]);
+      // Direct call — no artificial timeout that causes false 'timed out' errors
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
-      
-      // We no longer manually fetch role or navigate here.
-      // onAuthStateChange listener will detect the SIGNED_IN event,
-      // call fetchRole, update user/role states, and Auth.jsx's useEffect
-      // will handle the navigation to /dashboard.
-      
+      // onAuthStateChange (SIGNED_IN) will update user/role and Auth.jsx redirects
       return true;
     } catch (err) {
       toast.error(err.message || 'Login failed');
@@ -162,15 +158,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Clear React state immediately so UI updates at once
+    setUser(null);
+    setRole(null);
+    // IMPORTANT: Do NOT call localStorage.clear() or sessionStorage.clear().
+    // Supabase uses navigator.locks internally — clearing localStorage destroys
+    // its lock tracking keys while the actual Web Lock stays held, which causes
+    // the next signInWithPassword() call to time out waiting for the lock.
+    // Let supabase.auth.signOut() handle its own cleanup correctly.
     try {
       await supabase.auth.signOut();
     } catch (err) {
       console.error('Error during signOut', err);
     }
-    localStorage.clear();
-    sessionStorage.clear();
-    setUser(null);
-    setRole(null);
     navigate('/');
   };
 

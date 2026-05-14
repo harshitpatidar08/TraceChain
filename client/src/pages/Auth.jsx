@@ -15,18 +15,7 @@ import ChatbotWidget from '../components/ChatbotWidget';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
-
-  const { login, register, user, role } = useAuth();
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user && role) {
-      navigate('/dashboard');
-    }
-  }, [user, role, navigate]);
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -34,6 +23,17 @@ const Auth = () => {
     organization: '',
     role: 'farmer'
   });
+
+  const { login, register, user, role } = useAuth();
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If we have a confirmed user + role, redirect to dashboard immediately
+    if (user && role) {
+      navigate('/dashboard');
+    }
+  }, [user, role, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -44,9 +44,7 @@ const Auth = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    setLoading(true);
-
+    setIsSubmitting(true);
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
@@ -63,7 +61,7 @@ const Auth = () => {
       console.error(err);
       toast.error('Authentication failed');
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -352,10 +350,10 @@ const Auth = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full mt-3 bg-slate-900 hover:bg-slate-800 text-white py-4 rounded-2xl font-semibold transition-all duration-300 flex items-center justify-center gap-2"
               >
-                {loading ? (
+                {isSubmitting ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
