@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "install-all": "npm install --prefix server && npm install --prefix client",
+    "build-frontend": "npm run build --prefix client",
+    "build": "npm run install-all && npm run build-frontend",
+    "start": "node server/index.js",
     "dev": "concurrently \"cd client && npm run dev\" \"cd server && node index.js\"",
     "blockchain": "cd blockchain && npx hardhat node",
     "deploy": "cd blockchain && npx hardhat run scripts/deploy.js --network localhost"
