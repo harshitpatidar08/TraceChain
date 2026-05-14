@@ -2,6 +2,7 @@ import express from 'express';
 import crypto from 'node:crypto';
 import { supabase } from '../config/supabase.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { logEventToBlockchain } from '../services/blockchainService.js';
 
 const router = express.Router();
 
@@ -66,6 +67,21 @@ router.post('/log', authMiddleware, async (req, res) => {
       .eq('id', product_id);
 
     if (updateError) throw updateError;
+
+    // Call blockchain service
+    try {
+      const txHash = await logEventToBlockchain(event.id, stage, role, hash);
+      if (txHash) {
+        await supabase
+          .from('supply_chain_events')
+          .update({ blockchain_tx_hash: txHash })
+          .eq('id', event.id);
+        
+        event.blockchain_tx_hash = txHash;
+      }
+    } catch (bcError) {
+      console.error('Blockchain logging failed but ignored:', bcError.message);
+    }
 
     res.status(201).json(event);
   } catch (error) {

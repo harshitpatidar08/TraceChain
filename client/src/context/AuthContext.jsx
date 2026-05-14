@@ -13,13 +13,18 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     let mounted = true;
+    
+    // Add a maximum timeout of 3 seconds
+    const timeoutId = setTimeout(() => {
+      if (mounted) setLoading(false);
+    }, 3000);
 
     const initAuth = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           setUser(session.user);
-          await fetchRole(session.user.id, session.user.user_metadata);
+          await fetchRole(session.user.id);
         }
       } catch (err) {
         console.error('Error fetching session:', err);
@@ -36,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       if (mounted) setLoading(true);
       if (session?.user) {
         setUser(session.user);
-        await fetchRole(session.user.id, session.user.user_metadata);
+        await fetchRole(session.user.id);
       } else {
         setUser(null);
         setRole(null);
@@ -46,19 +51,14 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
       authListener.subscription.unsubscribe();
     };
   }, []);
 
-  const fetchRole = async (userId, userMetadata = null) => {
+  const fetchRole = async (userId) => {
     try {
-      // 1. Check metadata passed or from state
-      if (userMetadata?.role) {
-        setRole(userMetadata.role);
-        return userMetadata.role;
-      }
-
-      // 2. Fallback to users_extended table
+      // Always fetch fresh from users_extended table, ignore userMetadata cache
       const { data, error } = await supabase
         .from('users_extended')
         .select('role')
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
       
       if (data.user) {
         // Fetch role with our new resilient fetchRole
-        const userRole = await fetchRole(data.user.id, data.user.user_metadata);
+        const userRole = await fetchRole(data.user.id);
         
         // Redirect based on role
         if (userRole) {
@@ -168,155 +168,19 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('Error during signOut', err);
+    }
+    localStorage.clear();
+    sessionStorage.clear();
     setUser(null);
     setRole(null);
     navigate('/');
   };
 
   if (loading) {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden relative">
-
-      {/* Background Glow */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-40" />
-
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-40" />
-
-      {/* Loader Card */}
-      <div className="relative bg-white border border-slate-200 rounded-[36px] px-12 py-14 shadow-sm flex flex-col items-center max-w-md w-full">
-
-        {/* Animated Logo */}
-        <div className="relative mb-8">
-
-          <div className="w-24 h-24 rounded-[32px] bg-emerald-100 flex items-center justify-center animate-pulse">
-
-            <svg
-              className="w-12 h-12 text-emerald-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12l2 2l4-4m5-2a9 9 0 11-18 0a9 9 0 0118 0z"
-              />
-            </svg>
-
-          </div>
-
-          {/* Spinner Ring */}
-          <div className="absolute inset-0 rounded-[32px] border-4 border-emerald-200 border-t-emerald-500 animate-spin"></div>
-
-        </div>
-
-        {/* Brand */}
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-3">
-
-          TraceChain
-
-        </h1>
-
-        <p className="text-slate-500 text-center leading-relaxed mb-8">
-
-          Initializing secure blockchain authentication
-          and loading your dashboard experience.
-
-        </p>
-
-        {/* Loading Bar */}
-
-        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-
-          <div className="h-full w-1/2 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full animate-pulse"></div>
-
-        </div>
-
-        <p className="text-sm text-slate-400 mt-5">
-
-          Verifying session...
-
-        </p>
-
-      </div>
-    </div>
-  );
-}
-
-if (loading) {
-  return (
-    <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden relative">
-
-      {/* Background Glow */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-100 rounded-full blur-3xl opacity-40" />
-
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-40" />
-
-      {/* Loader Card */}
-      <div className="relative bg-white border border-slate-200 rounded-[36px] px-12 py-14 shadow-sm flex flex-col items-center max-w-md w-full">
-
-        {/* Animated Logo */}
-        <div className="relative mb-8">
-
-          <div className="w-24 h-24 rounded-[32px] bg-emerald-100 flex items-center justify-center animate-pulse">
-
-            <svg
-              className="w-12 h-12 text-emerald-600"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12l2 2l4-4m5-2a9 9 0 11-18 0a9 9 0 0118 0z"
-              />
-            </svg>
-
-          </div>
-
-          {/* Spinner Ring */}
-          <div className="absolute inset-0 rounded-[32px] border-4 border-emerald-200 border-t-emerald-500 animate-spin"></div>
-
-        </div>
-
-        {/* Brand */}
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 mb-3">
-
-          TraceChain
-
-        </h1>
-
-        <p className="text-slate-500 text-center leading-relaxed mb-8">
-
-          Initializing secure blockchain authentication
-          and loading your dashboard experience.
-
-        </p>
-
-        {/* Loading Bar */}
-
-        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
-
-          <div className="h-full w-1/2 bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-full animate-pulse"></div>
-
-        </div>
-
-        <p className="text-sm text-slate-400 mt-5">
-
-          Verifying session...
-
-        </p>
-
-      </div>
-    </div>
-  );
-}
-
-if (loading) {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center overflow-hidden relative">
 

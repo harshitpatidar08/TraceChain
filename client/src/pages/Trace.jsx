@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { MapPin, ShieldCheck, AlertCircle, CalendarDays, Loader2, Copy } from 'lucide-react';
+import { MapPin, ShieldCheck, AlertCircle, CalendarDays, Loader2, Copy, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { supabase } from '../config/supabase';
 
@@ -181,6 +181,14 @@ const Trace = () => {
       <div className="h-40 bg-white bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px] border-b border-slate-100 relative flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC] to-transparent"></div>
         <h1 className="text-slate-200 font-black text-5xl uppercase tracking-[0.5em] opacity-40 select-none z-0">ORIGIN</h1>
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 z-10 flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-slate-200 hover:bg-white hover:border-slate-300 text-slate-600 hover:text-slate-900 px-4 py-2 rounded-xl font-semibold text-sm transition-all shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 -mt-14 z-10 relative space-y-8">
@@ -238,47 +246,46 @@ const Trace = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-           {/* MIDDLE: AI Insights */}
-           <AIInsightBox product={product} events={events} gapAnalysis={gapAnalysis} />
-           
-           <div className="bg-white/90 backdrop-blur-sm p-8 rounded-[36px] border border-slate-200 shadow-sm flex flex-col justify-center">
-             <h3 className="text-slate-400 font-black text-[10px] uppercase mb-6 tracking-[0.2em] flex items-center gap-2">
-               <ShieldCheck className="w-4 h-4 text-emerald-500" /> Chain Integrity
-             </h3>
-             <div className="space-y-5">
-               <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                 <span className="text-slate-500 font-semibold text-sm">Event Count</span>
-                 <span className="font-black text-slate-900 text-xl bg-[#F8FAFC] px-4 py-1 rounded-xl border border-slate-100">{events.length}</span>
-               </div>
-               {events.length > 0 && (
-                 <>
-                   <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                     <span className="text-slate-500 font-semibold text-sm">Ledger Genesis</span>
-                     <span className="font-mono text-xs font-bold text-slate-700 bg-[#F8FAFC] px-3 py-1 rounded-xl border border-slate-100">{new Date(events[0].created_at).toLocaleDateString()}</span>
-                   </div>
-                   <div className="flex justify-between items-center border-b border-slate-50 pb-3">
-                     <span className="text-slate-500 font-semibold text-sm">Last Event</span>
-                     <span className="font-mono text-xs font-bold text-slate-700 bg-[#F8FAFC] px-3 py-1 rounded-xl border border-slate-100">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
-                   </div>
-                 </>
-               )}
-               <div className="flex justify-between items-center">
-                 <span className="text-slate-500 font-semibold text-sm">Verification</span>
-                 <span className="px-3 py-1.5 bg-emerald-50 rounded-full font-mono text-[10px] font-black text-emerald-700 border border-emerald-100 uppercase tracking-widest shadow-sm">SHA-256 Hashed</span>
-               </div>
-             </div>
-           </div>
+        {/* Chain Integrity — Compact Horizontal Stat Bar */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm px-6 py-4 flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-2 mr-2">
+            <ShieldCheck className="w-4 h-4 text-emerald-500" />
+            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400">Chain Integrity</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-500 text-sm font-semibold">Events</span>
+            <span className="font-black text-slate-900 text-base bg-[#F8FAFC] px-3 py-0.5 rounded-lg border border-slate-100">{events.length}</span>
+          </div>
+          {events.length > 0 && (
+            <>
+              <div className="w-px h-4 bg-slate-200" />
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">First logged</span>
+                <span className="font-mono text-sm text-slate-700 font-bold bg-[#F8FAFC] px-3 py-0.5 rounded-lg border border-slate-100">{new Date(events[0].created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="w-px h-4 bg-slate-200" />
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">Last event</span>
+                <span className="font-mono text-sm text-slate-700 font-bold bg-[#F8FAFC] px-3 py-0.5 rounded-lg border border-slate-100">{new Date(events[events.length - 1].created_at).toLocaleDateString()}</span>
+              </div>
+            </>
+          )}
+          <div className="ml-auto">
+            <span className="px-3 py-1.5 bg-emerald-50 rounded-full font-mono text-[10px] text-emerald-700 border border-emerald-100 uppercase font-black tracking-widest">SHA-256 Hashed</span>
+          </div>
         </div>
 
+        {/* MIDDLE: AI Insights — Full Width */}
+        <AIInsightBox product={product} events={events} gapAnalysis={gapAnalysis} />
+
         {/* BOTTOM: Timeline */}
-        <div className="bg-white/90 backdrop-blur-sm p-6 md:p-10 rounded-[36px] shadow-sm border border-slate-200 overflow-hidden">
-          <h2 className="text-xl font-black mb-10 flex items-center gap-4 text-slate-900">
-             <div className="w-10 h-10 bg-emerald-100 rounded-2xl flex items-center justify-center border border-emerald-100">
-               <MapPin className="text-emerald-600 w-5 h-5" />
-             </div>
-             Origin Journey Map
-          </h2>
+        <div className="bg-white/90 backdrop-blur-sm p-6 md:p-8 rounded-[28px] shadow-sm border border-slate-200 overflow-hidden">
+          <div className="flex items-center gap-3 mb-6 pb-5 border-b border-slate-100">
+            <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <MapPin className="text-emerald-600 w-4 h-4" />
+            </div>
+            <h2 className="text-base font-black text-slate-900 uppercase tracking-wider">Origin Journey Map</h2>
+          </div>
           <SupplyChainTimeline events={events} currentStage={product.current_stage} gapAnalysis={gapAnalysis} />
         </div>
 

@@ -32,6 +32,7 @@ const RegisterProduct = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [originLoading, setOriginLoading] = useState(false);
   const [successData, setSuccessData] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -53,7 +54,7 @@ const RegisterProduct = () => {
     }
   });
 
-  const availableCerts = ['FSSAI', 'ISO', 'Organic', 'Halal', 'Vegan'];
+  const availableCerts = ['FSSAI', 'ISO', 'Organic', 'Vegan'];
 
   const handleNext = (e) => {
     e.preventDefault();
@@ -69,17 +70,21 @@ const RegisterProduct = () => {
     }));
   };
 
+  const reverseGeocode = async (latitude, longitude) => {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&accept-language=en`
+    );
+    const data = await res.json();
+    return data.address.city || data.address.town || data.address.village || data.address.state_district || data.address.state || '';
+  };
+
   const getLocation = () => {
     setLocationLoading(true);
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`
-          );
-          const data = await res.json();
-          const city = data.address.city || data.address.state_district || data.address.state;
+          const city = await reverseGeocode(latitude, longitude);
           setFormData((prev) => ({
             ...prev,
             first_event: { ...prev.first_event, location: city }
@@ -93,6 +98,27 @@ const RegisterProduct = () => {
       () => {
         toast.error('Location access denied or failed');
         setLocationLoading(false);
+      }
+    );
+  };
+
+  const getOriginLocation = () => {
+    setOriginLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const city = await reverseGeocode(latitude, longitude);
+          setFormData((prev) => ({ ...prev, origin: city }));
+          toast.success('Origin location fetched');
+        } catch (error) {
+          toast.error('Error fetching origin location');
+        }
+        setOriginLoading(false);
+      },
+      () => {
+        toast.error('Location access denied or failed');
+        setOriginLoading(false);
       }
     );
   };
@@ -309,7 +335,7 @@ const RegisterProduct = () => {
 
                 {/* Brand */}
                 <div>
-                  <label className={labelClass}>Brand</label>
+                  <label className={labelClass}>Brand <span className="text-slate-300 normal-case font-normal tracking-normal">Optional</span></label>
                   <input
                     value={formData.brand}
                     onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
@@ -348,15 +374,26 @@ const RegisterProduct = () => {
                 {/* Origin — full width */}
                 <div className="md:col-span-2">
                   <label className={labelClass}>Origin Location *</label>
-                  <div className="relative">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-slate-400" />
+                  <div className="flex">
                     <input
                       required
                       value={formData.origin}
                       onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
                       placeholder="e.g. Punjab, India"
-                      className={`${inputClass} pl-11`}
+                      className="flex-1 bg-[#F8FAFC] border border-slate-200 rounded-l-2xl px-4 py-3.5 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400/30 focus:border-emerald-400 transition-all font-medium"
                     />
+                    <button
+                      type="button"
+                      onClick={getOriginLocation}
+                      disabled={originLoading}
+                      className="bg-slate-900 hover:bg-slate-800 disabled:opacity-60 text-white px-5 rounded-r-2xl transition-all flex items-center justify-center"
+                    >
+                      {originLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <MapPin className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
 
@@ -374,10 +411,9 @@ const RegisterProduct = () => {
 
                 {/* Expiry Date */}
                 <div>
-                  <label className={labelClass}>Expiry Date *</label>
+                  <label className={labelClass}>Expiry Date <span className="text-slate-300 normal-case font-normal tracking-normal">Optional</span></label>
                   <input
                     type="date"
-                    required
                     value={formData.exp_date}
                     onChange={(e) => setFormData({ ...formData, exp_date: e.target.value })}
                     className={inputClass}

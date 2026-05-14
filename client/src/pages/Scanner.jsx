@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import QRScanner from '../components/QRScanner';
+import ChatbotWidget from '../components/ChatbotWidget';
 
 import {
   ScanLine,
@@ -9,6 +10,7 @@ import {
   Image as ImageIcon,
   Loader2,
   ArrowRight,
+  ArrowLeft,
   ShieldCheck
 } from 'lucide-react';
 
@@ -128,6 +130,15 @@ const Scanner = () => {
       <div className="fixed bottom-0 right-0 w-96 h-96 bg-orange-100 rounded-full blur-3xl opacity-40 -z-10" />
 
       <div className="max-w-3xl mx-auto">
+
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-slate-500 hover:text-slate-900 font-semibold text-sm transition-colors mb-10"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </button>
 
         {/* Header */}
 
@@ -333,6 +344,8 @@ const Scanner = () => {
         )}
 
       </div>
+
+      <ChatbotWidget />
     </div>
   );
 };

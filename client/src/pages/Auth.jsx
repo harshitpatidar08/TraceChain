@@ -11,6 +11,7 @@ import {
 
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import ChatbotWidget from '../components/ChatbotWidget';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -379,6 +380,8 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      <ChatbotWidget />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatbotWidget from './ChatbotWidget';
@@ -12,6 +12,7 @@ import {
 
 const AppLayout = () => {
   const { user, role, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const { notifications, unreadCount, markAllAsRead, markAsRead } = useNotifications();
@@ -45,16 +46,12 @@ const AppLayout = () => {
   const farmerLinks = [
     { to: '/dashboard/farmer/products', icon: Package, label: 'My Products' },
     { to: '/dashboard/farmer/register', icon: Plus, label: 'Register Product' },
-    { to: '/dashboard/events', icon: ListOrdered, label: 'My Events' },
     { to: '/dashboard/search', icon: Search, label: 'Search Product' },
-    { to: '/dashboard/profile', icon: User, label: 'My Profile' },
   ];
 
   const supplyLinks = [
     { to: '/dashboard/scan', icon: ScanLine, label: 'Scan & Log' },
-    { to: '/dashboard/events', icon: ListOrdered, label: 'My Events' },
     { to: '/dashboard/search', icon: Search, label: 'Search Product' },
-    { to: '/dashboard/profile', icon: User, label: 'My Profile' },
   ];
 
   const adminLinks = [
@@ -62,7 +59,6 @@ const AppLayout = () => {
     { to: '/dashboard/admin/products', icon: Boxes, label: 'All Products' },
     { to: '/dashboard/admin/alerts', icon: AlertTriangle, label: 'Alerts Center' },
     { to: '/dashboard/admin/events', icon: ClipboardList, label: 'All Events' },
-    { to: '/dashboard/profile', icon: User, label: 'My Profile' },
   ];
 
   let links = [];
@@ -277,15 +273,18 @@ const AppLayout = () => {
               </AnimatePresence>
             </div>
 
-            <div className="flex items-center gap-3 pl-3 border-l border-slate-100">
+            <button
+              onClick={() => navigate('/dashboard/profile')}
+              className="flex items-center gap-3 pl-3 border-l border-slate-100 hover:opacity-80 transition-opacity"
+            >
               <div className="hidden sm:block text-right">
                 <p className="text-xs font-bold text-slate-900 truncate max-w-[120px]">{displayName}</p>
                 <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">{role}</p>
               </div>
-              <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-xs">
+              <div className="w-9 h-9 rounded-xl bg-slate-900 flex items-center justify-center text-white font-black text-xs cursor-pointer">
                 {getInitials(displayName)}
               </div>
-            </div>
+            </button>
           </div>
         </header>
 

@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "C:\\Users\\harsh\\OneDrive\\Documents\\OriginX\\tracechain\\blockchain\\contracts\\SupplyChainLogger.sol": {
+      "lastModificationDate": 1778735551282,
+      "contentHash": "6c64cf688e263410869f1817da36d81a",
+      "sourceName": "contracts/SupplyChainLogger.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "SupplyChainLogger"
+      ]
+    }
+  }
+}

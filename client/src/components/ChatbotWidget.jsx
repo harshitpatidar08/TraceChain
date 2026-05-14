@@ -87,8 +87,10 @@ const ChatbotWidget = ({
         conversationHistory: history
       };
 
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
       const res = await fetch(
-        'http://localhost:5000/api/chatbot',
+        `${baseUrl}/api/chatbot`,
         {
           method: 'POST',
           headers: {
@@ -110,22 +112,24 @@ const ChatbotWidget = ({
           }
         ]);
       } else {
+        console.error('Chatbot API error:', data);
         setMessages([
           ...newMsgs,
           {
             role: 'assistant',
             text:
-              'Oops, I encountered an error connecting to my brain.'
+              `Sorry, something went wrong (${res.status}). Please try again.`
           }
         ]);
       }
     } catch (error) {
+      console.error('Chatbot fetch error:', error);
       setMessages([
         ...newMsgs,
         {
           role: 'assistant',
           text:
-            'Oops, network error occurred.'
+            'Could not reach the server. Make sure the backend is running, then try again.'
         }
       ]);
     }
@@ -138,7 +142,7 @@ const ChatbotWidget = ({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
 
       {/* Chat Window */}
 
@@ -358,27 +362,25 @@ const ChatbotWidget = ({
 
       {/* Floating Button */}
 
-      {/* Floating Button */}
+      {!isOpen && (
+        <motion.button
+          onClick={() => setIsOpen(true)}
+          whileHover={{ scale: 1.06 }}
+          whileTap={{ scale: 0.96 }}
+          className="relative w-16 h-16 rounded-[24px] bg-slate-900 hover:bg-slate-800 text-white shadow-2xl flex items-center justify-center overflow-hidden border border-slate-700"
+        >
 
-{!isOpen && (
-  <motion.button
-    onClick={() => setIsOpen(true)}
-    whileHover={{ scale: 1.06 }}
-    whileTap={{ scale: 0.96 }}
-    className="fixed bottom-6 right-6 z-[9999] w-16 h-16 rounded-[24px] bg-slate-900 hover:bg-slate-800 text-white shadow-2xl flex items-center justify-center overflow-hidden border border-slate-700"
-  >
+          {/* Glow */}
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-orange-400/20" />
 
-    {/* Glow */}
-    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-orange-400/20" />
+          {/* Pulse Ring */}
+          <div className="absolute inset-0 rounded-[24px] border border-emerald-400/30 animate-ping" />
 
-    {/* Pulse Ring */}
-    <div className="absolute inset-0 rounded-[24px] border border-emerald-400/30 animate-ping" />
+          {/* Icon */}
+          <MessageCircle className="w-7 h-7 relative z-10" />
 
-    {/* Icon */}
-    <MessageCircle className="w-7 h-7 relative z-10" />
-
-  </motion.button>
-)}
+        </motion.button>
+      )}
       
     </div>
   );
