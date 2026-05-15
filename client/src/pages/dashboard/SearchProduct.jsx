@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\config.js';
 import React, { useState } from 'react';
 import { Search, Loader2, Package, MapPin, Calendar, Activity, ScanLine } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,7 +17,7 @@ const SearchProduct = () => {
     setLoading(true);
     setProduct(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${traceId.trim()}`);
+      const res = await fetch(`${API_BASE_URL}/api/products/${traceId.trim()}`);
       if (!res.ok) throw new Error('Product not found. Please check the Trace ID.');
       const data = await res.json();
       setProduct(data.product);

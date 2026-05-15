@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\..\config.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../config/supabase';
 import { Package, AlertTriangle, BarChart3, Activity, CheckCircle, ArrowRight } from 'lucide-react';
@@ -63,7 +64,7 @@ const Overview = () => {
   const handleResolveAlert = async (id) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`http://localhost:5000/api/alerts/${id}/resolve`, {
+      const res = await fetch(`${API_BASE_URL}/api/alerts/${id}/resolve`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });

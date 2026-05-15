@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\config.js';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
@@ -68,7 +69,7 @@ const Admin = () => {
 
       if (activeTab === 'alerts') {
         const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch('http://localhost:5000/api/alerts', {
+        const res = await fetch(`${API_BASE_URL}/api/alerts`, {
           headers: { 'Authorization': `Bearer ${session.access_token}` }
         });
         const data = await res.json();
@@ -87,7 +88,7 @@ const Admin = () => {
   const handleResolveAlert = async (id) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`http://localhost:5000/api/alerts/${id}/resolve`, {
+      const res = await fetch(`${API_BASE_URL}/api/alerts/${id}/resolve`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
@@ -103,7 +104,7 @@ const Admin = () => {
   const handleStatusChange = async (id, status) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`http://localhost:5000/api/products/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/status`, {
         method: 'PATCH',
         headers: { 
           'Authorization': `Bearer ${session.access_token}`, 

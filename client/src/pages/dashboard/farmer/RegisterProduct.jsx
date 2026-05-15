@@ -128,7 +128,7 @@ const RegisterProduct = () => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch('http://localhost:5000/api/products/register', {
+      const res = await fetch(`${API_BASE_URL}/api/products/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,8 @@ const RegisterProduct = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to register product');
       setSuccessData(data);
       addNotification(
-        `✅ Product registered successfully!\nTrace ID: ${data.product.id}`,
+        `✅ Product registered successfully!\import { API_BASE_URL } from '..\..\..\config.js';
+nTrace ID: ${data.product.id}`,
         'success'
       );
     } catch (err) {

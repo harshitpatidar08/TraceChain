@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\config.js';
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
@@ -51,7 +52,7 @@ const ScanAndLog = () => {
     setSearchLoading(true);
     setSuccessHash(null);
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${id}`);
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}`);
       if (!res.ok) throw new Error('Product not found or invalid ID');
       const data = await res.json();
       setProduct(data.product);
@@ -107,7 +108,7 @@ const ScanAndLog = () => {
         ...eventData
       };
 
-      const res = await fetch('http://localhost:5000/api/events/log', {
+      const res = await fetch(`${API_BASE_URL}/api/events/log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

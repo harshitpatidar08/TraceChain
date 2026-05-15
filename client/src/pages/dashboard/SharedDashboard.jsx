@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\config.js';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../config/supabase';
@@ -57,7 +58,7 @@ const SharedDashboard = ({ roleType }) => {
     if (!traceId) return;
     setSearchLoading(true);
     try {
-      const res = await fetch(`http://localhost:5000/api/products/${traceId}`);
+      const res = await fetch(`${API_BASE_URL}/api/products/${traceId}`);
       if (!res.ok) throw new Error('Product not found');
       const data = await res.json();
       setProduct(data.product);
@@ -107,7 +108,7 @@ const SharedDashboard = ({ roleType }) => {
         ...eventData
       };
 
-      const res = await fetch('http://localhost:5000/api/events/log', {
+      const res = await fetch(`${API_BASE_URL}/api/events/log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

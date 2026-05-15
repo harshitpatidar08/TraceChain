@@ -19,7 +19,32 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback) {
+    // allow requests with no origin (like same-origin or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    if (process.env.NODE_ENV === 'production') {
+      // If FRONTEND_URL is not set, be permissive and allow all to prevent breaking the app
+      if (!process.env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      if (origin === process.env.FRONTEND_URL) {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    } else {
+      // Development
+      if (origin === 'http://localhost:5173') {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Routes

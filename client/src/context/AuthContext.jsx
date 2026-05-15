@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
 
       if (!mounted) return;
       
-      // Do not block UI on token refresh or user update, just silently update user
+      // Silently update user on token refresh or user update without re-fetching role
       if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (session?.user) {
           setUser(session.user);
@@ -45,7 +45,6 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      setLoading(true);
       if (session?.user) {
         setUser(session.user);
         await fetchRole(session.user.id, session.user.user_metadata);
@@ -53,7 +52,6 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setRole(null);
       }
-      if (mounted) setLoading(false);
     });
 
     return () => {
@@ -102,10 +100,21 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      // Direct call — no artificial timeout that causes false 'timed out' errors
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Server is slow, please try again")), 5000)
+      );
+
+      const loginPromise = supabase.auth.signInWithPassword({ email, password });
+      
+      const { data, error } = await Promise.race([loginPromise, timeout]);
+      
       if (error) throw error;
-      // onAuthStateChange (SIGNED_IN) will update user/role and Auth.jsx redirects
+      
+      if (data?.user) {
+        setUser(data.user);
+        setRole(data.user.user_metadata?.role || 'farmer');
+      }
+      
       return true;
     } catch (err) {
       toast.error(err.message || 'Login failed');

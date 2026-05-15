@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\..\config.js';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../config/supabase';
 import { AlertTriangle, CheckCircle, ShieldAlert, Thermometer, Info, Clock, CheckCircle2 } from 'lucide-react';
@@ -15,7 +16,7 @@ const AlertsCenter = () => {
     setLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch('http://localhost:5000/api/alerts', {
+      const res = await fetch(`${API_BASE_URL}/api/alerts`, {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
       if (!res.ok) throw new Error('Failed to fetch alerts');
@@ -34,7 +35,7 @@ const AlertsCenter = () => {
   const handleResolve = async (id) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`http://localhost:5000/api/alerts/${id}/resolve`, {
+      const res = await fetch(`${API_BASE_URL}/api/alerts/${id}/resolve`, {
         method: 'PATCH',
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });

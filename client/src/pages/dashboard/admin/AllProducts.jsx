@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '..\..\..\config.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../config/supabase';
 import { Search, Package, AlertTriangle, Eye, Loader2, RefreshCw } from 'lucide-react';
@@ -43,7 +44,7 @@ const AllProducts = () => {
     setUpdatingId(id);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`http://localhost:5000/api/products/${id}/status`, {
+      const res = await fetch(`${API_BASE_URL}/api/products/${id}/status`, {
         method: 'PATCH',
         headers: { 
           'Authorization': `Bearer ${session.access_token}`,
