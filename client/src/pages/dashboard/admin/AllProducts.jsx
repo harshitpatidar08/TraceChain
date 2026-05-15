@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '..\..\..\config.js';
+import { API_BASE_URL } from '../../../config.js';
 import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../config/supabase';
 import { Search, Package, AlertTriangle, Eye, Loader2, RefreshCw } from 'lucide-react';

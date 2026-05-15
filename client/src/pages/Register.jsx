@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '..\config.js';
+import { API_BASE_URL } from '../config.js';
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
