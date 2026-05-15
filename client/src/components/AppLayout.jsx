@@ -7,7 +7,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { 
   Menu, X, LogOut, Bell, Zap, Package, Plus, ListOrdered, 
   Search, User, ScanLine, LayoutDashboard, Boxes, 
-  AlertTriangle, ClipboardList, CheckCircle, Info, ShieldCheck
+  AlertTriangle, ClipboardList, CheckCircle, Info, ShieldCheck, PieChart
 } from 'lucide-react';
 
 const AppLayout = () => {
@@ -59,6 +59,7 @@ const AppLayout = () => {
     { to: '/dashboard/admin/products', icon: Boxes, label: 'All Products' },
     { to: '/dashboard/admin/alerts', icon: AlertTriangle, label: 'Alerts Center' },
     { to: '/dashboard/admin/events', icon: ClipboardList, label: 'All Events' },
+    { to: '/dashboard/admin/report', icon: PieChart, label: 'Monthly Report' },
   ];
 
   let links = [];

@@ -6,7 +6,7 @@
 -- 1. PRODUCTS TABLE
 CREATE TABLE products (
   id TEXT PRIMARY KEY,
-  -- Format: TC-YYYY-CATEGORY-XXX (example: TC-2026-FOOD-001)
+  -- Format: MP/{PINCODE}/{FARMERID}/{CROPCODE}/{QUANTITY}/{UNITCODE}/{BATCHID} (example: MP/453331/F001/TOM/0500/01/B001)
   name TEXT NOT NULL,
   brand TEXT,
   category TEXT NOT NULL CHECK (category IN ('food','retail')),
@@ -23,6 +23,11 @@ CREATE TABLE products (
     ('active','recalled','expired')),
   qr_code_url TEXT,
   trust_score INTEGER DEFAULT 100,
+  pincode TEXT,
+  farmer_id TEXT,
+  crop_code TEXT,
+  batch_id TEXT,
+  unit_code TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -67,6 +72,7 @@ CREATE TABLE users_extended (
   display_name TEXT,
   organization TEXT,
   phone TEXT,
+  farmer_id TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
 

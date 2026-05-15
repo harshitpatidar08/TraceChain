@@ -18,6 +18,8 @@ import {
   AnimatePresence
 } from 'framer-motion';
 
+import { API_BASE_URL } from '../config';
+
 const ChatbotWidget = ({
   productContext = null
 }) => {
@@ -87,10 +89,8 @@ const ChatbotWidget = ({
         conversationHistory: history
       };
 
-      const baseUrl = import.meta.env.MODE === 'production' ? (import.meta.env.VITE_API_BASE_URL || '') : 'http://localhost:5000';
-
       const res = await fetch(
-        `${baseUrl}/api/chatbot`,
+        `${API_BASE_URL}/api/chatbot`,
         {
           method: 'POST',
           headers: {

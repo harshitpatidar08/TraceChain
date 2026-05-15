@@ -2,14 +2,15 @@ import express from 'express';
 import { supabase, getUserSupabase } from '../config/supabase.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { generateQR } from '../services/qrService.js';
+import crypto from 'node:crypto';
+import { logEventToBlockchain } from '../services/blockchainService.js';
 
 const router = express.Router();
 
-function generateTraceId(category, existingCount) {
-  const year = new Date().getFullYear();
-  const catUpper = category.toUpperCase();
-  const countPadded = String(existingCount + 1).padStart(3, '0');
-  return `TC-${year}-${catUpper}-${countPadded}`;
+// Helper function to format the Trace ID
+function generateTraceId(pincode, farmer_id, crop_code, quantity, unit_code, batch_id) {
+  const paddedQty = String(quantity).padStart(4, '0');
+  return `MP/${pincode}/${farmer_id}/${crop_code}/${paddedQty}/${unit_code}/${batch_id}`;
 }
 
 // POST /register
@@ -17,37 +18,78 @@ router.post('/register', authMiddleware, async (req, res) => {
   try {
     const { 
       name, brand, category, description, origin, 
-      weight, certifications, mfg_date, exp_date, 
+      pincode, crop_code, quantity, unit_code,
+      certifications, mfg_date, exp_date, 
       first_event 
     } = req.body;
 
     const userSupabase = getUserSupabase(req);
+    const userId = req.user.id;
 
-    // Fetch existing count to generate Trace ID
-    const { count, error: countError } = await userSupabase
+    // 1. Get or create farmer_id
+    let { data: userExt, error: userExtErr } = await userSupabase
+      .from('users_extended')
+      .select('farmer_id, id')
+      .eq('user_id', userId)
+      .single();
+
+    if (userExtErr && userExtErr.code !== 'PGRST116') throw userExtErr;
+
+    let farmer_id = userExt?.farmer_id;
+    if (!farmer_id) {
+      const { count: farmerCount, error: fCountErr } = await userSupabase
+        .from('users_extended')
+        .select('*', { count: 'exact', head: true })
+        .not('farmer_id', 'is', null);
+
+      if (fCountErr) throw fCountErr;
+
+      farmer_id = `F${String((farmerCount || 0) + 1).padStart(3, '0')}`;
+      
+      if (userExt) {
+        await userSupabase.from('users_extended').update({ farmer_id }).eq('user_id', userId);
+      } else {
+        await userSupabase.from('users_extended').insert({ user_id: userId, role: 'farmer', farmer_id });
+      }
+    }
+
+    // 2. Generate batch ID for this farmer and crop
+    const { count: batchCount, error: bCountErr } = await userSupabase
       .from('products')
-      .select('id', { count: 'exact' })
-      .like('id', `TC-${new Date().getFullYear()}-${category.toUpperCase()}-%`);
+      .select('*', { count: 'exact', head: true })
+      .eq('farmer_id', farmer_id)
+      .eq('crop_code', crop_code);
+      
+    if (bCountErr) throw bCountErr;
 
-    if (countError) throw countError;
+    const batch_id = `B${String((batchCount || 0) + 1).padStart(3, '0')}`;
 
-    const traceId = generateTraceId(category, count || 0);
+    // 3. Construct Trace ID
+    const traceId = generateTraceId(pincode, farmer_id, crop_code, quantity, unit_code, batch_id);
 
-    // Generate QR code
+    // 4. Generate QR code
     const qrCodeUrl = await generateQR(traceId);
 
-    // Provide registered_by directly (if using middleware or bypassing here, assuming bypassing or client provides it right now?)
-    // Wait, the rules say: "Insert into products table... Return product + qr_code base64 PNG".
-    // I should extract user from auth header? The request doesn't explicitly mention "Protected route" for /register like it does for /my/products. But products have registered_by. Let's use it if available, or just insert it.
-    
-    // Insert into products table
+    // 5. Insert into products table
     const productPayload = {
       id: traceId,
-      name, brand, category, description, origin,
-      weight, certifications, mfg_date, exp_date,
+      name: name || 'Farm Product', 
+      brand, 
+      category: category || 'food', 
+      description, 
+      origin,
+      pincode,
+      farmer_id,
+      crop_code,
+      batch_id,
+      unit_code,
+      weight: `${quantity} ${unit_code === '01' ? 'KG' : unit_code === '02' ? 'Quintal' : 'Ton'}`,
+      certifications, 
+      mfg_date, 
+      exp_date,
       current_stage: 'farm',
       qr_code_url: qrCodeUrl,
-      registered_by: req.user.id
+      registered_by: userId
     };
 
     const { data: product, error: productError } = await userSupabase
@@ -58,26 +100,59 @@ router.post('/register', authMiddleware, async (req, res) => {
 
     if (productError) throw productError;
 
-    // Insert first event
+    // Insert first event automatically
+    const eventPayload = {
+      product_id: traceId,
+      stage: 'farm',
+      role: 'farmer',
+      actor: req.user?.user_metadata?.full_name || req.user?.email || 'Farmer',
+      location: origin || 'Unknown',
+      notes: 'Product registered',
+      previous_hash: 'GENESIS'
+    };
+
     if (first_event) {
-      const eventPayload = {
-        product_id: traceId,
-        stage: 'farm',
-        role: first_event.role,
-        actor: first_event.actor,
-        location: first_event.location,
-        temperature: first_event.temperature,
-        humidity: first_event.humidity,
-        notes: first_event.notes,
-        event_hash: 'GENESIS',
-        previous_hash: 'GENESIS'
-      };
+      if (first_event.role) eventPayload.role = first_event.role;
+      if (first_event.actor) eventPayload.actor = first_event.actor;
+      if (first_event.location) eventPayload.location = first_event.location;
+      if (first_event.temperature) eventPayload.temperature = first_event.temperature;
+      if (first_event.humidity) eventPayload.humidity = first_event.humidity;
+      if (first_event.notes) eventPayload.notes = first_event.notes;
+    }
 
-      const { error: eventError } = await userSupabase
-        .from('supply_chain_events')
-        .insert(eventPayload);
+    const hash = crypto.createHash('sha256')
+      .update(JSON.stringify({
+        product_id: eventPayload.product_id, 
+        stage: eventPayload.stage, 
+        actor: eventPayload.actor,
+        notes: eventPayload.notes, 
+        timestamp: new Date().toISOString(),
+        previous_hash: eventPayload.previous_hash
+      }))
+      .digest('hex');
+    
+    eventPayload.event_hash = hash;
 
-      if (eventError) console.error("Event Insert Error:", eventError);
+    const { data: eventData, error: eventError } = await userSupabase
+      .from('supply_chain_events')
+      .insert(eventPayload)
+      .select()
+      .single();
+
+    if (eventError) {
+      console.error("Event Insert Error:", eventError);
+    } else if (eventData) {
+      try {
+        const txHash = await logEventToBlockchain(eventData.id, eventPayload.stage, eventPayload.role, hash);
+        if (txHash) {
+          await userSupabase
+            .from('supply_chain_events')
+            .update({ blockchain_tx_hash: txHash })
+            .eq('id', eventData.id);
+        }
+      } catch (bcError) {
+        console.error('Blockchain logging failed but ignored:', bcError.message);
+      }
     }
 
     res.status(201).json({ product, qr_code: qrCodeUrl });
@@ -87,10 +162,27 @@ router.post('/register', authMiddleware, async (req, res) => {
   }
 });
 
-// GET /:traceId
-router.get('/:traceId', async (req, res) => {
+// GET /my/products
+router.get('/my/products', authMiddleware, async (req, res) => {
   try {
-    const { traceId } = req.params;
+    const userSupabase = getUserSupabase(req);
+    const { data: products, error } = await userSupabase
+      .from('products')
+      .select('*')
+      .eq('registered_by', req.user.id);
+
+    if (error) throw error;
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /:traceId
+router.get('/*traceId', async (req, res) => {
+  try {
+    const traceIdRaw = req.params.traceId;
+    const traceId = Array.isArray(traceIdRaw) ? traceIdRaw.join('/') : traceIdRaw;
 
     const { data: product, error: productError } = await supabase
       .from('products')
@@ -114,26 +206,13 @@ router.get('/:traceId', async (req, res) => {
   }
 });
 
-// GET /my/products
-router.get('/my/products', authMiddleware, async (req, res) => {
-  try {
-    const userSupabase = getUserSupabase(req);
-    const { data: products, error } = await userSupabase
-      .from('products')
-      .select('*')
-      .eq('registered_by', req.user.id);
-
-    if (error) throw error;
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
+// Moved above dynamic routes to avoid conflict
 
 // PATCH /:id/status (Protected - Admin)
-router.patch('/:id/status', authMiddleware, async (req, res) => {
+router.patch('/*id/status', authMiddleware, async (req, res) => {
   try {
-    const { id } = req.params;
+    const idRaw = req.params.id;
+    const id = Array.isArray(idRaw) ? idRaw.join('/') : idRaw;
     const { status } = req.body;
 
     const userSupabase = getUserSupabase(req);

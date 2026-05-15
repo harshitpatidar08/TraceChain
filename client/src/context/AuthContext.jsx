@@ -16,13 +16,47 @@ export const AuthProvider = ({ children }) => {
 
     const initAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          if (error.message?.toLowerCase().includes('refresh token')) {
+            await supabase.auth.signOut();
+            toast.error('Session expired, please login again.');
+            navigate('/auth');
+            return;
+          }
+          throw error;
+        }
+
+        const session = data?.session;
+
         if (mounted && session?.user) {
           setUser(session.user);
-          await fetchRole(session.user.id, session.user.user_metadata);
+          
+          let currentRole = session.user.user_metadata?.role || 'farmer';
+          
+          // Sync with database in case it was manually updated by admin
+          const { data: extData } = await supabase
+            .from('users_extended')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .single();
+            
+          if (extData?.role && extData.role !== currentRole) {
+            currentRole = extData.role;
+            // Update the metadata silently so it stays fast next time
+            supabase.auth.updateUser({ data: { role: currentRole } });
+          }
+          
+          setRole(currentRole);
         }
       } catch (err) {
         console.error('Error fetching session:', err);
+        if (err.message?.toLowerCase().includes('refresh token')) {
+          await supabase.auth.signOut();
+          toast.error('Session expired, please login again.');
+          navigate('/auth');
+        }
       } finally {
         // Only the finally block controls loading — no race-condition timeout
         if (mounted) setLoading(false);
@@ -37,6 +71,13 @@ export const AuthProvider = ({ children }) => {
 
       if (!mounted) return;
       
+      if (event === 'TOKEN_REFRESH_FAILED') {
+        await supabase.auth.signOut();
+        toast.error('Session expired, please login again.');
+        navigate('/auth');
+        return;
+      }
+
       // Silently update user on token refresh or user update without re-fetching role
       if (event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
         if (session?.user) {
@@ -47,7 +88,7 @@ export const AuthProvider = ({ children }) => {
 
       if (session?.user) {
         setUser(session.user);
-        await fetchRole(session.user.id, session.user.user_metadata);
+        setRole(session.user.user_metadata?.role || 'farmer');
       } else {
         setUser(null);
         setRole(null);
@@ -60,43 +101,7 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const fetchRole = async (userId, userMetadata = {}) => {
-    try {
-      // Always fetch fresh from users_extended table, ignore userMetadata cache
-      const { data, error } = await supabase
-        .from('users_extended')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-        
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Auto-create profile with role from metadata or default to farmer
-          const defaultRole = userMetadata.role || 'farmer';
-          try {
-            await supabase.from('users_extended').insert({
-              user_id: userId,
-              role: defaultRole,
-              display_name: userMetadata.display_name || '',
-              organization: userMetadata.organization || ''
-            });
-            setRole(defaultRole);
-            return defaultRole;
-          } catch (e) {
-            console.error('Error auto-creating profile:', e);
-            return null;
-          }
-        }
-        throw error;
-      }
-      
-      setRole(data?.role || null);
-      return data?.role;
-    } catch (err) {
-      console.error('Error fetching role:', err);
-      return null;
-    }
-  };
+
 
   const login = async (email, password) => {
     try {
@@ -112,7 +117,22 @@ export const AuthProvider = ({ children }) => {
       
       if (data?.user) {
         setUser(data.user);
-        setRole(data.user.user_metadata?.role || 'farmer');
+        
+        let currentRole = data.user.user_metadata?.role || 'farmer';
+        
+        // Ensure manual DB changes are caught instantly on login
+        const { data: extData } = await supabase
+          .from('users_extended')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .single();
+          
+        if (extData?.role && extData.role !== currentRole) {
+          currentRole = extData.role;
+          supabase.auth.updateUser({ data: { role: currentRole } });
+        }
+        
+        setRole(currentRole);
       }
       
       return true;

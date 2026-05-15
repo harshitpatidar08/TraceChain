@@ -20,16 +20,16 @@ const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
         <div className="absolute top-[22px] left-[36px] right-[36px] h-[2px] bg-slate-100 z-0" />
 
         {STAGES.map((stage, index) => {
-          const event = events.find((e) => e.stage === stage.id);
+          const event = events.find((e) => e.stage?.toLowerCase() === stage.id.toLowerCase());
           const isCompleted = !!event;
-          const isCurrent = stage.id === currentStage;
+          const isCurrent = stage.id.toLowerCase() === currentStage?.toLowerCase();
           const isMissing = gapAnalysis?.missingStages?.includes(stage.id);
           const isDelayed = gapAnalysis?.delayedStages?.includes(stage.id);
           const isExpanded = expandedStage === stage.id;
 
           // Determine progress fill for this connector
           const prevStage = STAGES[index - 1];
-          const prevCompleted = prevStage ? !!events.find((e) => e.stage === prevStage.id) : false;
+          const prevCompleted = prevStage ? !!events.find((e) => e.stage?.toLowerCase() === prevStage.id.toLowerCase()) : false;
 
           let dotBg, dotBorder, dotText, labelColor;
 
@@ -102,7 +102,7 @@ const SupplyChainTimeline = ({ events, currentStage, gapAnalysis }) => {
 
       {/* Expanded Event Card */}
       {expandedStage && (() => {
-        const event = events.find((e) => e.stage === expandedStage);
+        const event = events.find((e) => e.stage?.toLowerCase() === expandedStage.toLowerCase());
         const stageMeta = STAGES.find((s) => s.id === expandedStage);
         if (!event) return null;
 

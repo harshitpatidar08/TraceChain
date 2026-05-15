@@ -1,6 +1,6 @@
 export const analyzeChain = (events, product) => {
   const expectedStages = ['farm', 'processing', 'distribution', 'retail'];
-  const actualStages = events.map(e => e.stage);
+  const actualStages = events.map(e => (e.stage || '').toLowerCase());
   
   const missingStages = [];
   const delayedStages = [];
@@ -10,7 +10,7 @@ export const analyzeChain = (events, product) => {
 
   // Check if expected stages are missing from the history so far
   // We determine what the product's current stage is and then see if earlier stages are missing.
-  const currentStageIndex = product.current_stage ? expectedStages.indexOf(product.current_stage) : -1;
+  const currentStageIndex = product.current_stage ? expectedStages.indexOf(product.current_stage.toLowerCase()) : -1;
   if (currentStageIndex > 0) {
     for (let i = 0; i < currentStageIndex; i++) {
       if (!actualStages.includes(expectedStages[i])) {
@@ -28,7 +28,7 @@ export const analyzeChain = (events, product) => {
       const curr = new Date(events[i].created_at);
       const gapDays = (curr - prev) / (1000 * 60 * 60 * 24);
       if (gapDays > 7) {
-        delayedStages.push(events[i].stage);
+        delayedStages.push((events[i].stage || '').toLowerCase());
         trustDeductions += 10;
         insights.push({ severity: 'medium', message: `⚠ ${Math.floor(gapDays)} day delay after ${events[i-1].stage}` });
       }

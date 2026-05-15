@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../../../config';
 
 import { useAuth } from '../../../context/AuthContext';
 import { useNotifications } from '../../../context/NotificationContext';
@@ -25,6 +26,48 @@ import toast from 'react-hot-toast';
 import { supabase } from '../../../config/supabase';
 import { Link } from 'react-router-dom';
 
+export const PINCODE_MAP = {
+  '453331': 'Rau, Indore',
+  '453441': 'Mhow, Indore',
+  '453771': 'Depalpur, Indore',
+  '453551': 'Sanwer, Indore',
+  '452001': 'Indore City',
+  '452012': 'Rajendra Nagar, Indore',
+  '462001': 'Bhopal City',
+  '462010': 'Berasia, Bhopal',
+  '462030': 'Phanda, Bhopal',
+  '462026': 'Huzur, Bhopal',
+  '474001': 'Gwalior City',
+  '473880': 'Bhitarwar, Gwalior',
+  '475110': 'Dabra, Gwalior',
+  '474006': 'Morar, Gwalior',
+  '482001': 'Jabalpur City',
+  '483220': 'Panagar, Jabalpur',
+  '483880': 'Sihora, Jabalpur',
+  '481776': 'Kundam, Jabalpur'
+};
+
+export const CROPS = [
+  { code: 'WHT', name: 'Wheat' },
+  { code: 'RCE', name: 'Rice' },
+  { code: 'SOY', name: 'Soybean' },
+  { code: 'ONI', name: 'Onion' },
+  { code: 'TOM', name: 'Tomato' },
+  { code: 'POT', name: 'Potato' },
+  { code: 'GAR', name: 'Garlic' },
+  { code: 'MZE', name: 'Maize' },
+  { code: 'CTN', name: 'Cotton' },
+  { code: 'SGC', name: 'Sugarcane' },
+  { code: 'GNT', name: 'Groundnut' },
+  { code: 'OTH', name: 'Other' }
+];
+
+export const UNITS = [
+  { code: '01', name: 'KG' },
+  { code: '02', name: 'Quintal' },
+  { code: '03', name: 'Ton' }
+];
+
 const RegisterProduct = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
@@ -39,8 +82,11 @@ const RegisterProduct = () => {
     name: '',
     brand: '',
     category: 'food',
+    pincode: '',
+    crop_code: 'WHT',
+    quantity: '',
+    unit_code: '01',
     origin: '',
-    weight: '',
     mfg_date: '',
     exp_date: '',
     description: '',
@@ -140,8 +186,7 @@ const RegisterProduct = () => {
       if (!res.ok) throw new Error(data.error || 'Failed to register product');
       setSuccessData(data);
       addNotification(
-        `✅ Product registered successfully!\import { API_BASE_URL } from '..\..\..\config.js';
-nTrace ID: ${data.product.id}`,
+        `✅ Product registered successfully!\nTrace ID: ${data.product.id}`,
         'success'
       );
     } catch (err) {
@@ -183,11 +228,24 @@ nTrace ID: ${data.product.id}`,
             </p>
 
             {/* Trace ID */}
-            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl px-8 py-5 mb-6 inline-block">
-              <span className="text-[10px] text-slate-400 uppercase tracking-widest block mb-2 font-black">Trace ID</span>
-              <span className="font-mono text-lg text-emerald-600 font-black tracking-wider break-all">
-                {successData.product.id}
-              </span>
+            {/* Trace ID and generated Info */}
+            <div className="bg-[#F8FAFC] border border-slate-200 rounded-2xl px-8 py-5 mb-6 inline-block text-left w-full max-w-sm mx-auto">
+              <div className="mb-4">
+                <span className="text-[10px] text-slate-400 uppercase tracking-widest block mb-1 font-black">Trace ID</span>
+                <span className="font-mono text-lg text-emerald-600 font-black tracking-wider break-all">
+                  {successData.product.id}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest block mb-1 font-black">Farmer ID</span>
+                  <span className="font-mono text-sm text-slate-700 font-bold">{successData.product.farmer_id}</span>
+                </div>
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase tracking-widest block mb-1 font-black">Batch ID</span>
+                  <span className="font-mono text-sm text-slate-700 font-bold">{successData.product.batch_id}</span>
+                </div>
+              </div>
             </div>
 
             {/* QR Code */}
@@ -240,7 +298,10 @@ nTrace ID: ${data.product.id}`,
                     name: '',
                     brand: '',
                     origin: '',
-                    weight: '',
+                    pincode: '',
+                    crop_code: 'WHT',
+                    quantity: '',
+                    unit_code: '01',
                     mfg_date: '',
                     exp_date: '',
                     description: '',
@@ -345,31 +406,72 @@ nTrace ID: ${data.product.id}`,
                   />
                 </div>
 
-                {/* Category */}
+                {/* Pincode */}
                 <div>
-                  <label className={labelClass}>Category</label>
+                  <label className={labelClass}>Pincode *</label>
+                  <input
+                    required
+                    maxLength={6}
+                    value={formData.pincode}
+                    onChange={(e) => {
+                      const pin = e.target.value.replace(/\D/g, '');
+                      setFormData({ 
+                        ...formData, 
+                        pincode: pin,
+                        origin: PINCODE_MAP[pin] || formData.origin
+                      });
+                    }}
+                    placeholder="e.g. 453331"
+                    className={inputClass}
+                  />
+                  {formData.pincode.length === 6 && PINCODE_MAP[formData.pincode] && (
+                    <p className="text-xs text-emerald-600 font-medium mt-2 flex items-center gap-1">
+                      <MapPin className="w-3 h-3" /> {PINCODE_MAP[formData.pincode]}
+                    </p>
+                  )}
+                </div>
+
+                {/* Crop Name */}
+                <div>
+                  <label className={labelClass}>Crop Name *</label>
                   <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    value={formData.crop_code}
+                    onChange={(e) => setFormData({ ...formData, crop_code: e.target.value })}
                     className={inputClass}
                   >
-                    <option value="food">Food & Beverage</option>
-                    <option value="retail">Retail</option>
-                    <option value="pharmaceuticals">Pharmaceuticals</option>
-                    <option value="agriculture">Agriculture</option>
-                    <option value="other">Other</option>
+                    {CROPS.map(c => (
+                      <option key={c.code} value={c.code}>{c.name}</option>
+                    ))}
                   </select>
                 </div>
 
-                {/* Weight */}
+                {/* Quantity */}
                 <div>
-                  <label className={labelClass}>Weight / Quantity</label>
+                  <label className={labelClass}>Quantity *</label>
                   <input
-                    value={formData.weight}
-                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                    placeholder="e.g. 500kg batch"
+                    required
+                    type="number"
+                    min="1"
+                    max="9999"
+                    value={formData.quantity}
+                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                    placeholder="Max 4 digits (e.g. 500)"
                     className={inputClass}
                   />
+                </div>
+
+                {/* Unit */}
+                <div>
+                  <label className={labelClass}>Unit *</label>
+                  <select
+                    value={formData.unit_code}
+                    onChange={(e) => setFormData({ ...formData, unit_code: e.target.value })}
+                    className={inputClass}
+                  >
+                    {UNITS.map(u => (
+                      <option key={u.code} value={u.code}>{u.name}</option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Origin — full width */}

@@ -1,8 +1,9 @@
 import axios from 'axios'
-import { supabase } from './supabase'
+import { supabase } from '../config/supabase'
+import { API_BASE_URL } from '../config'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: API_BASE_URL,
 })
 
 api.interceptors.request.use(async (config) => {

@@ -38,6 +38,7 @@ const Overview = React.lazy(() => import('./pages/dashboard/admin/Overview'));
 const AlertsCenter = React.lazy(() => import('./pages/dashboard/admin/AlertsCenter'));
 const AllProducts = React.lazy(() => import('./pages/dashboard/admin/AllProducts'));
 const AllEvents = React.lazy(() => import('./pages/dashboard/admin/AllEvents'));
+const MonthlyReport = React.lazy(() => import('./pages/dashboard/admin/MonthlyReport'));
 
 /* Role Redirect */
 
@@ -155,7 +156,7 @@ function App() {
             />
 
             <Route
-              path="/trace/:traceId"
+              path="/trace/*"
               element={<Trace />}
             />
 
@@ -287,7 +288,7 @@ function App() {
               />
 
               <Route
-                path="product/:traceId"
+                path="product/*"
                 element={
                   <ProtectedRoute
                     allowedRoles={[
@@ -362,6 +363,21 @@ function App() {
                   >
 
                     <AllEvents />
+
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="admin/report"
+                element={
+                  <ProtectedRoute
+                    allowedRoles={[
+                      'admin'
+                    ]}
+                  >
+
+                    <MonthlyReport />
 
                   </ProtectedRoute>
                 }

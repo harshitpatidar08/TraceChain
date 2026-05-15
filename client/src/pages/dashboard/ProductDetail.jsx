@@ -12,8 +12,57 @@ import AIInsightBox from '../../components/AIInsightBox';
 import SupplyChainTimeline from '../../components/SupplyChainTimeline';
 import ChatbotWidget from '../../components/ChatbotWidget';
 
+const PINCODE_MAP = {
+  '453331': 'Rau, Indore',
+  '453441': 'Mhow, Indore',
+  '453771': 'Depalpur, Indore',
+  '453551': 'Sanwer, Indore',
+  '452001': 'Indore City',
+  '452012': 'Rajendra Nagar, Indore',
+  '462001': 'Bhopal City',
+  '462010': 'Berasia, Bhopal',
+  '462030': 'Phanda, Bhopal',
+  '462026': 'Huzur, Bhopal',
+  '474001': 'Gwalior City',
+  '473880': 'Bhitarwar, Gwalior',
+  '475110': 'Dabra, Gwalior',
+  '474006': 'Morar, Gwalior',
+  '482001': 'Jabalpur City',
+  '483220': 'Panagar, Jabalpur',
+  '483880': 'Sihora, Jabalpur',
+  '481776': 'Kundam, Jabalpur'
+};
+
+const CROP_MAP = {
+  'WHT': 'Wheat', 'RCE': 'Rice', 'SOY': 'Soybean', 'ONI': 'Onion',
+  'TOM': 'Tomato', 'POT': 'Potato', 'GAR': 'Garlic', 'MZE': 'Maize',
+  'CTN': 'Cotton', 'SGC': 'Sugarcane', 'GNT': 'Groundnut', 'OTH': 'Other'
+};
+
+const UNIT_MAP = {
+  '01': 'KG', '02': 'Quintal', '03': 'Ton'
+};
+
+const parseTraceId = (id) => {
+  if (!id || !id.startsWith('MP/')) return null;
+  const parts = id.split('/');
+  if (parts.length !== 7) return null;
+  
+  const [, pincode, farmerId, cropCode, quantityStr, unitCode, batchId] = parts;
+  return {
+    state: 'Madhya Pradesh',
+    pincode,
+    area: PINCODE_MAP[pincode] || 'Unknown Area',
+    farmerId,
+    crop: CROP_MAP[cropCode] || cropCode,
+    quantity: `${parseInt(quantityStr, 10)} ${UNIT_MAP[unitCode] || ''}`,
+    batch: batchId
+  };
+};
+
 const ProductDetail = () => {
-  const { traceId } = useParams();
+  const params = useParams();
+  const traceId = params['*'];
   const navigate = useNavigate();
   const { role } = useAuth();
   
@@ -137,6 +186,8 @@ const ProductDetail = () => {
   const expiryInfo = getExpiryInfo(product);
   const expiryColorMap = { green: 'text-emerald-600', red: 'text-red-600', orange: 'text-orange-600', gray: 'text-slate-400', slate: 'text-slate-600' };
 
+  const parsedInfo = parseTraceId(product.id);
+
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12 relative">
       
@@ -210,6 +261,44 @@ const ProductDetail = () => {
           <TrustScore score={score} />
         </div>
       </div>
+
+      {/* Parsed Info Location Card */}
+      {parsedInfo && (
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mb-4 ml-2">Trace Information</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 ml-2">
+            <div>
+              <p className="text-xs text-slate-400 font-bold">🏛 State</p>
+              <p className="font-semibold text-slate-900">{parsedInfo.state}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold">📍 Pincode</p>
+              <p className="font-semibold text-slate-900">{parsedInfo.pincode}</p>
+            </div>
+            <div className="col-span-2 md:col-span-1">
+              <p className="text-xs text-slate-400 font-bold">🏘 Area</p>
+              <p className="font-semibold text-slate-900">{parsedInfo.area}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold">👤 Farmer ID</p>
+              <p className="font-mono text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded inline-block">{parsedInfo.farmerId}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold">🌱 Crop</p>
+              <p className="font-semibold text-slate-900">{parsedInfo.crop}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold">⚖ Quantity</p>
+              <p className="font-semibold text-slate-900">{parsedInfo.quantity}</p>
+            </div>
+            <div>
+              <p className="text-xs text-slate-400 font-bold">📦 Batch</p>
+              <p className="font-mono text-slate-700 font-bold bg-slate-50 px-2 py-0.5 rounded inline-block">{parsedInfo.batch}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Chain Integrity — Compact Stat Bar */}
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 shadow-sm px-6 py-4 flex flex-wrap items-center gap-6">

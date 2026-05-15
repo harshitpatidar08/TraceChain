@@ -178,7 +178,7 @@ const ScanAndLog = () => {
           <p className="text-slate-500 text-sm mb-5">Scan a QR code to automatically load product details.</p>
           
           <div className="rounded-2xl overflow-hidden border border-slate-100 bg-[#F8FAFC] mb-5 relative min-h-[300px]">
-            <QRScanner onScanSuccess={handleScan} />
+            <QRScanner onScan={handleScan} />
           </div>
 
           <div className="flex items-center gap-4 mb-5">
