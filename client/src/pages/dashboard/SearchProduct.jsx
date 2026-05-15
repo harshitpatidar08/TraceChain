@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '..\..\config.js';
+import { API_BASE_URL } from '../../config.js';
 import React, { useState } from 'react';
 import { Search, Loader2, Package, MapPin, Calendar, Activity, ScanLine } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
